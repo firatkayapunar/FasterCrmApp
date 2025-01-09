@@ -1,5 +1,5 @@
 ﻿using FasterCrmApp.DataAccess.Abstract.Base;
-using FasterCrmApp.Entities;
+using FasterCrmApp.Entities.Concrete;
 
 namespace FasterCrmApp.DataAccess.Abstract
 {

@@ -1,4 +1,4 @@
-﻿using FasterCrmApp.Entities;
+﻿using FasterCrmApp.Entities.Concrete;
 using Microsoft.EntityFrameworkCore;
 
 namespace FasterCrmApp.DataAccess.Context.EntityFramework.Context

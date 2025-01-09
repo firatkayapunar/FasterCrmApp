@@ -1,5 +1,5 @@
 ﻿using FasterCrmApp.DataAccess.Abstract.Base;
-using FasterCrmApp.Entities.Concrete;
+using FasterCrmApp.Entities.Abstract;
 using Microsoft.EntityFrameworkCore;
 
 namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base

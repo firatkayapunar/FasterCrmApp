@@ -1,6 +1,6 @@
 ﻿using FasterCrmApp.DataAccess.Abstract;
 using FasterCrmApp.DataAccess.Context.EntityFramework.Context;
-using FasterCrmApp.Entities;
+using FasterCrmApp.Entities.Concrete;
 
 namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base
 {
