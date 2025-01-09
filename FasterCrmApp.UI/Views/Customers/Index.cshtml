@@ -1,0 +1,112 @@
+﻿@{
+    ViewData["Title"] = "Müşteriler";
+    ViewData["PageName"] = "customers-index";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+                    <h6 class="text-white text-capitalize ps-3">Müşteriler</h6>
+                </div>
+            </div>
+            <div class="card-body px-0 pb-2">
+                <div class="px-4 d-flex justify-content-between">
+                    <div>
+                        <button class="btn btn-icon btn-3 btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-default">
+                            <i class="material-symbols-rounded">add</i>
+                            <span>Yeni Müşteri</span>
+                        </button>
+                    </div>
+                    <div>
+                        <div class="input-group input-group-sm input-group-outline" type="button">
+                            <label class="form-label">Arama</label>
+                            <input type="text" class="form-control from-control-sm" />
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center justify-content-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ad Soyad / Şirket Adı</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">E-Posta</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Bireysel / Kurumsal</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Durumu</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Kayıt Tarihi</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="d-flex px-2">
+                                        <div class="my-auto">
+                                            <span class="mb-0 ps-2 text-sm">Asana</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-sm font-weight-bold mb-0"><a href="mailto:kaya.asana@gmail.com" target="_blank">kaya.asana@gmail.com</a></span>
+                                </td>
+                                <td>
+                                    <span class="text-xs font-weight-bold">Bireysel</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-sm bg-gradient-success">Aktif</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="text-xs font-weight-bold">@DateTime.Now</span>
+                                </td>
+                                <td class="text-center align-middle">
+                                    <a href="javascript:;" class="text-info font-weightbold text-xs me-2">Düzenle</a>
+                                    <a href="javascript:;" class="text-secondary font-weightbold text-xs me-2">Detay</a>
+                                    <a href="javascript:;" class="text-danger font-weightbold text-xs me-2">Sil</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modal-default" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+    <div class="modal-dialog modal- modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title font-weight-normal" id="modal-title-default">Type your modal title</h6>
+                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="text-sm">
+                    Lorem ipsum dolar.
+                </p>
+                <div>
+                    <div class="input-group input-group-outline my-3">
+                        <label class="form-label">Ad Soyad / Şirket Adı</label>
+                        <input type="text" class="form-control">
+                    </div>
+                    <div class="input-group input-group-outline is-invalid my-3">
+                        <label class="form-label">E-Posta</label>
+                        <input type="email" class="form-control">
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="fcustomCheck1" checked="">
+                        <label class="custom-control-label" for="customCheck1">Check this custom checkbox</label>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn bg-gradient-primary">Save changes</button>
+                <button type="button" class="btn btn-link  ml-auto" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
