@@ -31,7 +31,7 @@ namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base
             _entity.Add(entity);
             _context.SaveChanges();
         }
-        public void Delete(int id)
+        public void Remove(int id)
         {
             var entity = GetById(id);
             if (entity != null)

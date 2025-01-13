@@ -1,13 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FasterCrmApp.Models;
+using FasterCrmApp.Services.Abstract;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FasterCrmApp.UI.Controllers
 {
     public class CustomersController : Controller
     {
-        // GET: Customer
-        public ActionResult Index()
+        private readonly IClientService _clientService;
+
+        public CustomersController(IClientService clientService)
         {
-            return View();
+            _clientService = clientService;
+        }
+
+        // GET: Customer
+        public IActionResult Index()
+        {
+            var result = _clientService.GetList();
+            return View(result);
         }
 
         // GET: Customer/Details/5
@@ -25,16 +35,12 @@ namespace FasterCrmApp.UI.Controllers
         // POST: Customer/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(CreateCustomerModel createCustomerModel)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
+           
+
+
                 return View();
-            }
         }
 
         // GET: Customer/Edit/5

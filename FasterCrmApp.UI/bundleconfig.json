@@ -1,0 +1,8 @@
+[
+  {
+    "outputFileName": "wwwroot/assets/js/material-dashboard.min.js",
+    "inputFiles": [
+      "wwwroot/assets/js/material-dashboard.js"
+    ]
+  }
+]

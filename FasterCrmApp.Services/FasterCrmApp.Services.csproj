@@ -7,7 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FasterCrmApp.DataAccess\FasterCrmApp.DataAccess.csproj" />
     <ProjectReference Include="..\FasterCrmApp.Entities\FasterCrmApp.Entities.csproj" />
+    <ProjectReference Include="..\FasterCrmApp.Models\FasterCrmApp.Models.csproj" />
   </ItemGroup>
 
 </Project>

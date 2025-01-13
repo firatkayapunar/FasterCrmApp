@@ -7,6 +7,6 @@ namespace FasterCrmApp.DataAccess.Abstract.Base
     {
         void Add(TEntity entity);
         void Update(TEntity entity);
-        void Delete(int id);
+        void Remove(int id);
     }
 }

@@ -4,7 +4,7 @@
         string cssClass = string.Empty;
 
         if (ViewData["PageName"] != null)
-            cssClass = (ViewData["PageName"] == pageName) ? " active bg-gradient-dark text-white " : "text-dark";
+            cssClass = (ViewData["PageName"] == pageName) ? "active bg-gradient-dark text-white " : "text-dark";
 
         return cssClass;
     }
@@ -68,13 +68,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link  @GetNavActiveCssClass("leads-index")" asp-action="Index" asp-controller="Leads">
+                    <a class="nav-link text-dark @GetNavActiveCssClass("leads-index")" asp-action="Index" asp-controller="Leads">
                         <i class="material-symbols-rounded opacity-5">group_work</i>
                         <span class="nav-link-text ms-1">Talepler</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @GetNavActiveCssClass("issues-index")" asp-action="Index" asp-controller="Issues">
+                    <a class="nav-link text-dark @GetNavActiveCssClass("issues-index")" asp-action="Index" asp-controller="Issues">
                         <i class="material-symbols-rounded opacity-5">task_alt</i>
                         <span class="nav-link-text ms-1">Görevler</span>
                     </a>
@@ -104,7 +104,7 @@
                     </a>
                 </li> *@
                 <li class="nav-item">
-                    <a class="nav-link @GetNavActiveCssClass("notifications-index")" href="../pages/notifications.html">
+                    <a class="nav-link text-dark @GetNavActiveCssClass("notifications-index")" href="../pages/notifications.html">
                         <i class="material-symbols-rounded opacity-5">notifications</i>
                         <span class="nav-link-text ms-1">Bildirimler</span>
                     </a>
@@ -113,7 +113,7 @@
                     <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Yönetim</h6>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @GetNavActiveCssClass("users-index")" asp-action="Users" asp-controller="Admin">
+                    <a class="nav-link text-dark @GetNavActiveCssClass("users-index")" asp-action="Users" asp-controller="Admin">
                         <i class="material-symbols-rounded opacity-5">people</i>
                         <span class="nav-link-text ms-1">Kullanıcı Yönetimi</span>
                     </a>
@@ -122,7 +122,7 @@
                     <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Hesap Ayarları</h6>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @GetNavActiveCssClass("account-profile")" asp-action="Profile" asp-controller="Account">
+                    <a class="nav-link text-dark @GetNavActiveCssClass("account-profile")" asp-action="Profile" asp-controller="Account">
                         <i class="material-symbols-rounded opacity-5">person</i>
                         <span class="nav-link-text ms-1">Hesabım</span>
                     </a>
@@ -632,7 +632,7 @@
     <!-- Github buttons -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
-    <script src="~/assets/js/material-dashboard.min.js?v=3.2.0"></script>
+    <script src="~/assets/js/material-dashboard.min.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 
