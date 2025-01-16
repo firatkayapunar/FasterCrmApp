@@ -13,76 +13,37 @@ namespace FasterCrmApp.UI.Controllers
             _clientService = clientService;
         }
 
-        // GET: Customer
         public IActionResult Index()
         {
             var result = _clientService.GetList();
             return View(result);
         }
 
-        // GET: Customer/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var result = _clientService.Get(id);
+            return Json(result);
         }
 
-        // GET: Customer/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Customer/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult Create(CreateCustomerModel createCustomerModel)
         {
-           
-
-
-                return View();
+            var result = _clientService.Add(createCustomerModel);
+            return Json(result);
         }
 
-        // GET: Customer/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: Customer/Edit/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Update(UpdateCustomerModel updateCustomerModel)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            var result = _clientService.Update(updateCustomerModel);
+            return Json(result);
         }
 
-        // GET: Customer/Delete/5
+        [HttpPost]
         public ActionResult Delete(int id)
         {
-            return View();
-        }
-
-        // POST: Customer/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            var result = _clientService.Delete(new DeleteCustomerModel() { ID = id });
+            return Json(result);
         }
     }
 }

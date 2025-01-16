@@ -1,5 +1,5 @@
-﻿using FasterCrmApp.Entities.Results;
-using FasterCrmApp.Models;
+﻿using FasterCrmApp.Models;
+using FasterCrmApp.Models.Results;
 
 namespace FasterCrmApp.Services.Abstract
 {

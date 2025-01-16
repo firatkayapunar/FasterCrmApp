@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
 using FasterCrmApp.DataAccess.Abstract;
 using FasterCrmApp.Entities.Concrete;
-using FasterCrmApp.Entities.Results;
 using FasterCrmApp.Models;
+using FasterCrmApp.Models.Results;
 using FasterCrmApp.Services.Abstract;
 using FasterCrmApp.Services.Validation;
 using FasterCrmApp.Services.Validation.FluentValidation;
-using System.ComponentModel.DataAnnotations;
 
 namespace FasterCrmApp.Services.Concrete
 {
@@ -27,21 +26,26 @@ namespace FasterCrmApp.Services.Concrete
             {
                 var client = _mapper.Map<Client>(createCustomerModel);
 
+                // Validasyonu çalıştırıyoruz
                 ValidationTool.Validate(new ClientValidator(), client);
 
                 client.CreatedAt = DateTime.Now;
 
                 _clientRepository.Add(client);
-
-                return Result.SuccessResult("Customer successfully added.");
+                return Result.SuccessResult("Client successfully added.");
             }
-            catch (ValidationException ex)
+            catch (CustomValidationException ex)
             {
-                return Result.FailureResult("Validation failed.", new List<string> { ex.Message });
+                // CustomValidationException içindeki hataları direkt alıyoruz.
+                return Result.FailureResult("Validation failed.", ex.Errors);
             }
             catch (Exception ex)
             {
-                return Result.FailureResult("An error occurred while adding the customer.", new List<string> { ex.Message });
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while adding the customer.", errors);
             }
         }
 
@@ -52,9 +56,15 @@ namespace FasterCrmApp.Services.Concrete
                 var existingClient = _clientRepository.GetById(updateCustomerModel.ID);
 
                 if (existingClient == null)
-                    return Result.FailureResult("Client not found.", new List<string> { "The client with the given ID does not exist." });
+                {
+                    var errors = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "ID", new List<string> { "The client with the given ID does not exist." } }
+                    };
+                    return Result.FailureResult("Client not found.", errors);
+                }
 
-                var client = _mapper.Map<Client>(updateCustomerModel);
+                var client = _mapper.Map(updateCustomerModel, existingClient);
 
                 ValidationTool.Validate(new ClientValidator(), client);
 
@@ -62,15 +72,20 @@ namespace FasterCrmApp.Services.Concrete
 
                 return Result.SuccessResult("Client successfully updated.");
             }
-            catch (ValidationException ex)
+            catch (CustomValidationException ex)
             {
-                return Result.FailureResult("Validation failed.", new List<string> { ex.Message });
+                return Result.FailureResult("Validation failed.", ex.Errors);
             }
             catch (Exception ex)
             {
-                return Result.FailureResult("An error occurred while updating the client.", new List<string> { ex.Message });
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while updating the client.", errors);
             }
         }
+
         public Result Delete(DeleteCustomerModel deleteCustomerModel)
         {
             try
@@ -78,7 +93,13 @@ namespace FasterCrmApp.Services.Concrete
                 var client = _clientRepository.GetById(deleteCustomerModel.ID);
 
                 if (client == null)
-                    return Result.FailureResult("Client not found.", new List<string> { "The customer with the given ID does not exist." });
+                {
+                    var errors = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "ID", new List<string> { "The customer with the given ID does not exist." } }
+                    };
+                    return Result.FailureResult("Client not found.", errors);
+                }
 
                 _clientRepository.Remove(client.ID);
 
@@ -86,9 +107,14 @@ namespace FasterCrmApp.Services.Concrete
             }
             catch (Exception ex)
             {
-                return Result.FailureResult("An error occurred while deleting the client.", new List<string> { ex.Message });
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while deleting the client.", errors);
             }
         }
+
         public Result<CustomerModel> Get(int id)
         {
             try
@@ -98,13 +124,16 @@ namespace FasterCrmApp.Services.Concrete
                 if (client == null)
                     return Result<CustomerModel>.FailureResult("Client not found.", new List<string> { "The client with the given ID does not exist." });
 
-                return Result<CustomerModel>.SuccessResult(_mapper.Map<CustomerModel>(client));
+                var customerModel = _mapper.Map<CustomerModel>(client);
+
+                return Result<CustomerModel>.SuccessResult(customerModel, "Client retrieved successfully.");
             }
             catch (Exception ex)
             {
                 return Result<CustomerModel>.FailureResult("An error occurred.", new List<string> { ex.Message });
             }
         }
+
         public Result<List<CustomerModel>> GetList()
         {
             try
@@ -114,7 +143,9 @@ namespace FasterCrmApp.Services.Concrete
                 if (clients == null || !clients.Any())
                     return Result<List<CustomerModel>>.FailureResult("No clients found.", new List<string> { "The database contains no clients." });
 
-                return Result<List<CustomerModel>>.SuccessResult(_mapper.Map<List<CustomerModel>>(clients));
+                var customerModels = _mapper.Map<List<CustomerModel>>(clients);
+
+                return Result<List<CustomerModel>>.SuccessResult(customerModels.OrderByDescending(x => x.CreatedAt).ToList(), "Clients retrieved successfully.");
             }
             catch (Exception ex)
             {

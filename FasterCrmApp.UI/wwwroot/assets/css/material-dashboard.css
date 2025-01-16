@@ -23558,7 +23558,7 @@ body.dark-version {
 
 .input-group.input-group-dynamic.is-focused .form-label,
 .input-group.input-group-static.is-focused .form-label {
-  top: -0.7rem;
+  top: -0.4rem;
 }
 
 .input-group.input-group-dynamic.is-focused label,
@@ -29149,5 +29149,3 @@ pre[class*=language-] {
     overflow: auto !important;
   }
 }
-
-/*# sourceMappingURL=dashboard-free.css.map */
