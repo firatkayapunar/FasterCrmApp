@@ -20,11 +20,11 @@ namespace FasterCrmApp.Services.Concrete
             _mapper = mapper;
         }
 
-        public Result Add(CreateCustomerModel createCustomerModel)
+        public Result Add(CreateClientModel createClientModel)
         {
             try
             {
-                var client = _mapper.Map<Client>(createCustomerModel);
+                var client = _mapper.Map<Client>(createClientModel);
 
                 // Validasyonu çalıştırıyoruz
                 ValidationTool.Validate(new ClientValidator(), client);
@@ -45,15 +45,15 @@ namespace FasterCrmApp.Services.Concrete
                 {
                     { "General", new List<string> { ex.Message } }
                 };
-                return Result.FailureResult("An error occurred while adding the customer.", errors);
+                return Result.FailureResult("An error occurred while adding the client.", errors);
             }
         }
 
-        public Result Update(UpdateCustomerModel updateCustomerModel)
+        public Result Update(UpdateClientModel updateClientModel)
         {
             try
             {
-                var existingClient = _clientRepository.GetById(updateCustomerModel.ID);
+                var existingClient = _clientRepository.GetById(updateClientModel.ID);
 
                 if (existingClient == null)
                 {
@@ -64,7 +64,8 @@ namespace FasterCrmApp.Services.Concrete
                     return Result.FailureResult("Client not found.", errors);
                 }
 
-                var client = _mapper.Map(updateCustomerModel, existingClient);
+                var client = _mapper.Map(updateClientModel, existingClient);
+                client.CreatedAt = existingClient.CreatedAt;
 
                 ValidationTool.Validate(new ClientValidator(), client);
 
@@ -86,17 +87,17 @@ namespace FasterCrmApp.Services.Concrete
             }
         }
 
-        public Result Delete(DeleteCustomerModel deleteCustomerModel)
+        public Result Delete(DeleteClientModel deleteClientModel)
         {
             try
             {
-                var client = _clientRepository.GetById(deleteCustomerModel.ID);
+                var client = _clientRepository.GetById(deleteClientModel.ID);
 
                 if (client == null)
                 {
                     var errors = new Dictionary<string, IEnumerable<string>>
                     {
-                        { "ID", new List<string> { "The customer with the given ID does not exist." } }
+                        { "ID", new List<string> { "The client with the given ID does not exist." } }
                     };
                     return Result.FailureResult("Client not found.", errors);
                 }
@@ -115,41 +116,65 @@ namespace FasterCrmApp.Services.Concrete
             }
         }
 
-        public Result<CustomerModel> Get(int id)
+        public Result<ClientModel> Get(int id)
         {
             try
             {
                 var client = _clientRepository.GetById(id);
 
                 if (client == null)
-                    return Result<CustomerModel>.FailureResult("Client not found.", new List<string> { "The client with the given ID does not exist." });
+                    return Result<ClientModel>.FailureResult("Client not found.", new List<string> { "The client with the given ID does not exist." });
 
-                var customerModel = _mapper.Map<CustomerModel>(client);
+                var clientModel = _mapper.Map<ClientModel>(client);
 
-                return Result<CustomerModel>.SuccessResult(customerModel, "Client retrieved successfully.");
+                return Result<ClientModel>.SuccessResult(clientModel, "Client retrieved successfully.");
             }
             catch (Exception ex)
             {
-                return Result<CustomerModel>.FailureResult("An error occurred.", new List<string> { ex.Message });
+                return Result<ClientModel>.FailureResult("An error occurred.", new List<string> { ex.Message });
             }
         }
 
-        public Result<List<CustomerModel>> GetList()
+        public Result<List<ClientModel>> GetList()
         {
             try
             {
                 var clients = _clientRepository.GetAll();
 
                 if (clients == null || !clients.Any())
-                    return Result<List<CustomerModel>>.FailureResult("No clients found.", new List<string> { "The database contains no clients." });
+                    return Result<List<ClientModel>>.FailureResult("No clients found.", new List<string> { "The database contains no clients." });
 
-                var customerModels = _mapper.Map<List<CustomerModel>>(clients);
+                var clientModels = _mapper.Map<List<ClientModel>>(clients);
 
-                return Result<List<CustomerModel>>.SuccessResult(customerModels.OrderByDescending(x => x.CreatedAt).ToList(), "Clients retrieved successfully.");
+                return Result<List<ClientModel>>.SuccessResult(clientModels.OrderByDescending(x => x.CreatedAt).ToList(), "Clients retrieved successfully.");
             }
             catch (Exception ex)
             {
-                return Result<List<CustomerModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
+                return Result<List<ClientModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
+            }
+        }
+
+        public Result<List<ClientModel>> ListBySearch(string search)
+        {
+            try
+            {
+                var clients = _clientRepository.GetAll(x =>
+                              x.Name.Contains(search) ||
+                              x.Email.Contains(search) ||
+                              x.Phone.Contains(search) ||
+                              x.Description.Contains(search)
+                );
+
+                if (clients == null || !clients.Any())
+                    return Result<List<ClientModel>>.FailureResult("No clients found.", new List<string> { "The database contains no clients." });
+
+                var clientModels = _mapper.Map<List<ClientModel>>(clients);
+
+                return Result<List<ClientModel>>.SuccessResult(clientModels.OrderByDescending(x => x.CreatedAt).ToList(), "Clients retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<List<ClientModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
             }
         }
     }

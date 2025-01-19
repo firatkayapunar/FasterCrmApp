@@ -1,8 +1,49 @@
-﻿@model Result<List<CustomerModel>>;
+﻿@model Result<List<ClientModel>>;
 
 @{
     ViewData["Title"] = "Müşteriler";
-    ViewData["PageName"] = "customers-index";
+    ViewData["PageName"] = "clients-index";
+
+    var modals = new List<ModalViewModel>
+    {
+        new ModalViewModel
+        {
+            ID = "modal-create-client",
+            Title = "Yeni Müşteri Oluştur",
+            TitleID = "modal-title-create",
+            ActionButtonText = "Kaydet",
+            ActionButtonClass = "bg-gradient-primary",
+            OnActionClick = "createClient()",
+            ModelInputViewModel = new ModalInputViewModel()
+        },
+        new ModalViewModel
+        {
+            ID = "modal-edit-client",
+            Title = "Müşteri Güncelleme",
+            TitleID = "modal-title-edit",
+            ActionButtonText = "Güncelle",
+            ActionButtonClass = "bg-gradient-warning",
+            OnActionClick = "updateClient()",
+            ModelInputViewModel = new ModalInputViewModel { HasClientID = true }
+        },
+        new ModalViewModel
+        {
+            ID = "modal-details-client",
+            Title = "Müşteri Detayları",
+            TitleID = "modal-title-details",
+            ModelInputViewModel = new ModalInputViewModel { IsReadonly = true, IsDisabled = true }
+        },
+        new ModalViewModel
+        {
+            ID = "modal-delete-client",
+            Title = "Müşteri Sil (Bazı hataların geri dönüşü olmaz !)",
+            TitleID = "modal-title-delete",
+            ActionButtonText = "Sil",
+            ActionButtonClass = "bg-gradient-danger",
+            OnActionClick = "deleteClient()",
+            ModelInputViewModel = new ModalInputViewModel { IsReadonly = true, IsDisabled = true,HasClientID = true  }
+        }
+    };
 }
 
 @section Styles {
@@ -13,12 +54,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* Arka planı yarı şeffaf yapar */
             background-color: rgba(255, 255, 255, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Üstte görünmesi için yüksek z-index */
             z-index: 1050;
         }
     </style>
@@ -41,9 +80,9 @@
                         </button>
                     </div>
                     <div>
-                        <div class="input-group input-group-sm input-group-outline" type="button">
+                        <div class="input-group input-group-sm input-group-outline">
                             <label class="form-label">Arama</label>
-                            <input type="text" class="form-control from-control-sm" />
+                            <input id="search" name="search" type="text" class="form-control from-control-sm" autocomplete="off" />
                         </div>
                     </div>
                 </div>
@@ -71,32 +110,32 @@
                             }
                             else
                             {
-                                @foreach (var customer in Model.Data)
+                                @foreach (var client in Model.Data)
                                 {
                                     <tr>
                                         <td>
                                             <div class="d-flex px-2">
                                                 <div class="my-auto">
-                                                    <span class="mb-0 ps-2 text-sm">@customer.Name</span>
+                                                    <span class="mb-0 ps-2 text-sm">@client.Name</span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="text-sm font-weight-bold mb-0"><a href="mailto:kaya.asana@gmail.com" target="_blank">@customer.Email</a></span>
+                                            <span class="text-sm font-weight-bold mb-0"><a href="mailto:kaya.asana@gmail.com" target="_blank">@client.Email</a></span>
                                         </td>
                                         <td>
-                                            <span class="text-xs font-weight-bold">@(customer.IsCorporate ? "Kurumsal" : "Bireysel")</span>
+                                            <span class="text-xs font-weight-bold">@(client.IsCorporate ? "Kurumsal" : "Bireysel")</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge badge-sm @(customer.Locked ? " bg-gradient-secondary" : "bg-gradient-success")">@(customer.Locked ? "Pasif" : "Aktif")</span>
+                                            <span class="badge badge-sm @(client.Locked ? " bg-gradient-secondary" : "bg-gradient-success")">@(client.Locked ? "Pasif" : "Aktif")</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="text-xs font-weight-bold">@customer.CreatedAt</span>
+                                            <span class="text-xs font-weight-bold">@client.CreatedAt</span>
                                         </td>
                                         <td class="text-center align-middle">
-                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-edit-client" class="text-info font-weightbold text-xs me-2" onclick="setEditClientModal(@customer.ID)">Düzenle</a>
-                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-details-client" class="text-secondary font-weightbold text-xs me-2" onclick="setDetailsClientModal(@customer.ID)">Detay</a>
-                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-delete-client" class="text-danger font-weightbold text-xs me-2" onclick="setDeleteClientModal(@customer.ID)">Sil</a>
+                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-edit-client" class="text-info font-weightbold text-xs me-2" onclick="setEditClientModal(@client.ID)">Düzenle</a>
+                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-details-client" class="text-secondary font-weightbold text-xs me-2" onclick="setDetailsClientModal(@client.ID)">Detay</a>
+                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-delete-client" class="text-danger font-weightbold text-xs me-2" onclick="setDeleteClientModal(@client.ID)">Sil</a>
                                         </td>
                                     </tr>
                                 }
@@ -109,186 +148,10 @@
     </div>
 </div>
 
-<div class="modal fade" id="modal-create-client" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
-    <div class="modal-dialog modal- modal-dialog-centered modal-" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h6 class="modal-title font-weight-normal" id="modal-title-default">Yeni Müşteri Oluştur</h6>
-                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">Ad Soyad / Şirket Adı</label>
-                        <input id="name" type="text" class="form-control" autocomplete="off">
-                    </div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">E-Posta</label>
-                        <input id="email" type="email" class="form-control" autocomplete="off">
-                    </div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">Telefon</label>
-                        <input id="phone" type="tel" class="form-control" autocomplete="off">
-                    </div>
-                    <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="iscorporate">
-                        <label class="custom-control-label" for="customCheck1">Kurumsal</label>
-                    </div>
-                    <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="islocked">
-                        <label class="custom-control-label" for="customCheck1">Pasif</label>
-                    </div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">Açıklama</label>
-                        <textarea id="description" col="30" row="3" class="form-control" autocomplete="off"></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn bg-gradient-primary" onclick="createClient()">Kaydet</button>
-                <button type="button" class="btn btn-link  ml-auto" data-bs-dismiss="modal">Kapat</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modal-edit-client" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
-    <div class="modal-dialog modal- modal-dialog-centered modal-" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h6 class="modal-title font-weight-normal" id="modal-title-default">Müşteri Güncelleme</h6>
-                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">Ad Soyad / Şirket Adı</label>
-                        <input id="name" type="text" class="form-control" autocomplete="off">
-                    </div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">E-Posta</label>
-                        <input id="email" type="email" class="form-control" autocomplete="off">
-                    </div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">Telefon</label>
-                        <input id="phone" type="tel" class="form-control" autocomplete="off">
-                    </div>
-                    <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="iscorporate">
-                        <label class="custom-control-label" for="iscorporate">Kurumsal</label>
-                    </div>
-                    <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="islocked">
-                        <label class="custom-control-label" for="islocked">Pasif</label>
-                    </div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">Açıklama</label>
-                        <textarea id="description" col="30" row="3" class="form-control" autocomplete="off"></textarea>
-                    </div>
-                    <input type="hidden" id="clientid" value="" />
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn bg-gradient-warning" onclick="updateClient()">Güncelle</button>
-                <button type="button" class="btn btn-link  ml-auto" data-bs-dismiss="modal">Kapat</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modal-details-client" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
-    <div class="modal-dialog modal- modal-dialog-centered modal-" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h6 class="modal-title font-weight-normal" id="modal-title-default">Müşteri Detayları</h6>
-                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">Ad Soyad / Şirket Adı</label>
-                        <input id="name" type="text" class="form-control" readonly>
-                    </div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">E-Posta</label>
-                        <input id="email" type="email" class="form-control" readonly>
-                    </div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">Telefon</label>
-                        <input id="phone" type="tel" class="form-control" readonly>
-                    </div>
-                    <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="iscorporate" disabled>
-                        <label class="custom-control-label" for="iscorporate">Kurumsal</label>
-                    </div>
-                    <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="islocked" disabled>
-                        <label class="custom-control-label" for="islocked">Pasif</label>
-                    </div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">Açıklama</label>
-                        <textarea id="description" col="30" row="3" class="form-control" readonly></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-link  ml-auto" data-bs-dismiss="modal">Kapat</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modal-delete-client" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
-    <div class="modal-dialog modal- modal-dialog-centered modal-" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h6 class="modal-title font-weight-normal" id="modal-title-default">Müşteri Sil (Bazı hataların geri dönüşü olmaz !)</h6>
-                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">Ad Soyad / Şirket Adı</label>
-                        <input id="name" type="text" class="form-control" readonly>
-                    </div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">E-Posta</label>
-                        <input id="email" type="email" class="form-control" readonly>
-                    </div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">Telefon</label>
-                        <input id="phone" type="tel" class="form-control" readonly>
-                    </div>
-                    <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="iscorporate" disabled>
-                        <label class="custom-control-label" for="iscorporate">Kurumsal</label>
-                    </div>
-                    <div class="form-check my-3">
-                        <input class="form-check-input" type="checkbox" id="islocked" disabled>
-                        <label class="custom-control-label" for="islocked">Pasif</label>
-                    </div>
-                    <div class="input-group input-group-outline my-3">
-                        <label class="form-label">Açıklama</label>
-                        <textarea id="description" col="30" row="3" class="form-control" readonly></textarea>
-                    </div>
-                    <input type="hidden" id="clientid" value="" />
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn bg-gradient-danger" onclick="deleteClient()">Sil</button>
-                <button type="button" class="btn btn-link  ml-auto" data-bs-dismiss="modal">Kapat</button>
-            </div>
-        </div>
-    </div>
-</div>
+@foreach (var modal in modals)
+{
+    <partial name="_DynamicModal" model=modal></partial>
+}
 
 <div id="loadingSpinner" class="spinner-overlay" style="display: none;">
     <div class="spinner-border text-primary" role="status">
@@ -297,6 +160,7 @@
 </div>
 
 @section Scripts {
+
     <script>
 
         function createClient()
@@ -324,16 +188,13 @@
 
             $.ajax({
                 method: "post",
-                url: "/Customers/Create",
+                url: "/Clients/Create",
                 data: data,
                 beforeSend: function (){
                     modal_body.find(".is-invalid").removeClass("is-invalid");
-                    
-                    // Spinner'ı göster
                     $("#loadingSpinner").show();
                 },
                 complete: function () {
-                    // Spinner'ı gizle
                     $("#loadingSpinner").hide();
                 }
             }).done(function (result) {
@@ -415,16 +276,13 @@
 
             $.ajax({
                 method: "post",
-                url: "/Customers/Update",
+                url: "/Clients/Update",
                 data: data,
                 beforeSend: function (){
                     modal_body.find(".is-invalid").removeClass("is-invalid");
-
-                     // Spinner'ı göster
                     $("#loadingSpinner").show();
                 },
                 complete: function () {
-                    // Spinner'ı gizle
                     $("#loadingSpinner").hide();
                 }
             }).done(function(result){
@@ -454,22 +312,15 @@
          {
             var modal_body = $("#modal-delete-client .modal-body");
 
-            var clientId = modal_body.find("#clientid").val();
-
-            var data = {
-                "id": clientId,
-            };
+            var clientid = modal_body.find("#clientid").val();
 
             $.ajax({
                 method: "post",
-                url: "/Customers/Delete",
-                data: data,
+                url : `/Clients/Delete/${clientid}`,
                 beforeSend: function (){
-                     // Spinner'ı göster
                     $("#loadingSpinner").show();
                 },
                 complete: function () {
-                    // Spinner'ı gizle
                     $("#loadingSpinner").hide();
                 }
                 }).done(function(result){
@@ -495,13 +346,7 @@
         {
             $.ajax({
                 method : "get",
-                url : "Customers/Details/" + clientid,
-                beforeSend: function (){
-                    $("#loadingSpinner").show();
-                },
-                complete: function () {
-                    $("#loadingSpinner").hide();
-                }
+                url : `/Clients/Details/${clientid}`
             }).done(function(result){
                 if (result != null)
                 {
@@ -549,13 +394,7 @@
         {
             $.ajax({
                 method : "get",
-                url : "Customers/Details/" + clientid,
-                beforeSend: function (){
-                    $("#loadingSpinner").show();
-                },
-                complete: function () {
-                    $("#loadingSpinner").hide();
-                }
+                url : `/Clients/Details/${clientid}`
             }).done(function(result){
                 if (result != null)
                 {
@@ -587,15 +426,11 @@
 
         function setDetailsClientModal(clientid)
         {
+            console.log(clientid);
+
             $.ajax({
                 method : "get",
-                url : "Customers/Details/" + clientid,
-                beforeSend: function (){
-                    $("#loadingSpinner").show();
-                },
-                complete: function () {
-                    $("#loadingSpinner").hide();
-                }
+                url : `/Clients/Details/${clientid}`
             }).done(function(result){
                 if (result != null)
                 {
@@ -622,5 +457,137 @@
                 }
             });
         }
+
+        // Debouncing, bir olayın (örneğin bir giriş alanına yazma gibi) sürekli tetiklenmesi yerine belirli bir süre bekleyerek tek bir işlem yapılmasını sağlar.
+
+        // searchTimeout: Kullanıcı sürekli bir şeyler yazarken önceki işlemleri iptal etmek için kullanılan bir zamanlayıcı değişkeni.
+
+        let searchTimeout;
+
+        // jQuery'nin $() metodu DOM tamamen yüklendiğinde çalışacak işlemleri tanımlar.
+         $(function () {
+
+            // $("#search").on("input", ...): Kullanıcı arama kutusuna bir şey yazdığında çalışır.
+            $("#search").on("input", function ()
+            {
+                const search = $(this).val();
+
+                clearTimeout(searchTimeout);
+
+                // setTimeout asenkron olarak çalışıyor. Arka planda 500 milisaniye bekledikten sonra çalışır. Onun için kilitlenme olmaz ve JavaScript motorunu bloke olmaz.
+                // 1000 milisaniye, 1 saniyedir.
+                searchTimeout = setTimeout(function () {
+                    searchClients(search);
+                }, 1000);
+            });
+        });
+
+        function searchClients(search)
+        {
+        // encodeURIComponent JavaScript'te bir fonksiyondur ve URL içinde geçerli olmayan karakterleri URL güvenli bir formatta kodlamaya yarar. URL'de geçerli olmayan karakterler şunlardır:
+
+        // Boşluklar
+        // Özel karakterler (&, ?, =, /, #, % gibi)
+        // Unicode karakterleri (örneğin, ç, ğ, ü gibi Türkçe harfler)
+
+        // Neden Kullanılır?
+        // Eğer özel karakterler bir URL içinde kullanılırsa, URL'nin bozulmasına veya hatalara yol açabilir.
+
+        // Örneğin:
+        // const search = "john doe";
+        // const url = "/Clients/Search?search=" + search;
+
+        // Bu durumda URL şu şekilde oluşur:
+        // /Clients/Search?search=john doe
+
+        // Boşluk bir geçerli karakter değildir, bu yüzden URL çalışmaz.
+        // Bunun yerine:
+        // const search = "john doe";
+        // const url = "/Clients/Search?search=" + encodeURIComponent(search);
+
+        // Bu durumda URL şu şekilde kodlanır:
+        // /Clients/Search?search=john%20doe
+        // Bu artık geçerli bir URL'dir.
+
+          const url = '/Clients/Search?search=' + encodeURIComponent(search);
+
+          $.ajax({
+              method: "get",
+              url: url,
+              beforeSend: function () {
+                  $("#loadingSpinner").show();
+              },
+              complete: function () {
+                  $("#loadingSpinner").hide();
+              }
+          }).done(function (result)
+          {
+              if (result.success)
+              {
+                  updateTable(result.data);
+              }
+              else
+              {
+                  toastr.error(result.message, "Hata");
+              }
+          }).fail(function ()
+          {
+              toastr.error("Sunucuyla bağlantı kurulamadı.", "Hata");
+          });
+        }
+
+        function updateTable(clients) {
+
+            const tbody = $("table tbody");
+
+            tbody.empty();
+
+            if (clients && clients.length > 0)
+            {
+                clients.forEach((client) => {
+                    const row = `
+                        <tr>
+                            <td>
+                                <div class="d-flex px-2">
+                                    <div class="my-auto">
+                                        <span class="mb-0 ps-2 text-sm">${client.name}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-sm font-weight-bold mb-0"><a href="mailto:${client.email}" target="_blank">${client.email}</a></span>
+                            </td>
+                            <td>
+                                <span class="text-xs font-weight-bold">${client.isCorporate ? "Kurumsal" : "Bireysel"}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-sm ${client.locked ? "bg-gradient-secondary" : "bg-gradient-success"}">${client.locked ? "Pasif" : "Aktif"}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="text-xs font-weight-bold">${client.createdAt}</span>
+                            </td>
+                            <td class="text-center align-middle">
+                                <a href="javascript:;"  data-bs-toggle="modal" data-bs-target="#modal-edit-client" class="text-info font-weight-bold text-xs me-2" onclick="setEditClientModal(${client.id})">Düzenle</a>
+                                <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-details-client"  class="text-secondary font-weight-bold text-xs me-2" onclick="setDetailsClientModal(${client.id})">Detay</a>
+                                <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-delete-client" class="text-danger font-weight-bold text-xs me-2" onclick="setDeleteClientModal(${client.id})">Sil</a>
+                            </td>
+                        </tr>
+                    `;
+
+                    tbody.append(row);
+                });
+            }
+            else
+            {
+                tbody.append(`
+                    <tr>
+                        <td class="text-center" colspan="6">
+                            <span class="mb-0 ps-2 text-sm">Arama kriterlerine uygun müşteri bulunamadı.</span>
+                        </td>
+                    </tr>
+                `);
+            }
+        }
+
     </script>
 }

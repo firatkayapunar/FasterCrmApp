@@ -29,11 +29,6 @@ namespace FasterCrmApp.Services.Validation.FluentValidation
             // Description alanı en fazla 500 karakter olmalı.
             RuleFor(client => client.Description)
                 .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
-
-            // CreatedAt alanı şu andan sonraki bir tarih olamaz. Yani, CreatedAt özelliği geçmişte veya şimdiki zamanda olmalıdır, gelecekte bir tarih olamaz.
-            RuleFor(client => client.CreatedAt)
-                .LessThanOrEqualTo(DateTime.Now).WithMessage("CreatedAt cannot be in the future.");
         }
     }
 }
-//ValidationTool.Validate(new ClientValidator(), client);

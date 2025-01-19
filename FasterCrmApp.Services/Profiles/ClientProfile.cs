@@ -9,10 +9,10 @@ namespace FasterCrmApp.Services.Profiles
         public ClientProfile()
         {
             // DTO to Entity
-            CreateMap<CreateCustomerModel, Client>().ReverseMap();
-            CreateMap<UpdateCustomerModel, Client>().ReverseMap();
-            CreateMap<DeleteCustomerModel, Client>().ReverseMap();
-            CreateMap<CustomerModel, Client>().ReverseMap();
+            CreateMap<CreateClientModel, Client>().ReverseMap();
+            CreateMap<UpdateClientModel, Client>().ReverseMap();
+            CreateMap<DeleteClientModel, Client>().ReverseMap();
+            CreateMap<ClientModel, Client>().ReverseMap();
         }
     }
 }

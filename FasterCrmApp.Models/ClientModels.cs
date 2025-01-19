@@ -1,6 +1,6 @@
 ﻿namespace FasterCrmApp.Models
 {
-    public class CreateCustomerModel
+    public class CreateClientModel
     {
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
@@ -10,7 +10,7 @@
         public bool IsCorporate { get; set; }
     }
 
-    public class UpdateCustomerModel
+    public class UpdateClientModel
     {
         public int ID { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -21,12 +21,12 @@
         public bool IsCorporate { get; set; }
     }
 
-    public class DeleteCustomerModel
+    public class DeleteClientModel
     {
         public int ID { get; set; }
     }
 
-    public class CustomerModel
+    public class ClientModel
     {
         public int ID { get; set; }
         public string Name { get; set; } = string.Empty;

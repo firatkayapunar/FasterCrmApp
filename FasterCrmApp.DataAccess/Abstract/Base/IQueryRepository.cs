@@ -1,11 +1,13 @@
 ﻿using FasterCrmApp.Entities.Abstract;
+using System.Linq.Expressions;
 
 namespace FasterCrmApp.DataAccess.Abstract.Base
 {
     public interface IQueryRepository<TEntity>
                      where TEntity : BaseEntity
     {
-        IEnumerable<TEntity> GetAll();
         TEntity GetById(int id);
+        IEnumerable<TEntity> GetAll();
+        IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate);
     }
 }

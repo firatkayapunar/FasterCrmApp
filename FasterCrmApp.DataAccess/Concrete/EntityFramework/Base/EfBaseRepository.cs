@@ -1,6 +1,7 @@
 ﻿using FasterCrmApp.DataAccess.Abstract.Base;
 using FasterCrmApp.Entities.Abstract;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base
 {
@@ -22,15 +23,23 @@ namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base
         {
             return _entity.ToList();
         }
+        
         public TEntity GetById(int id)
         {
             return _entity.Find(id);
         }
+        
+        public IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate)
+        {
+            return _entity.Where(predicate);
+        }
+        
         public void Add(TEntity entity)
         {
             _entity.Add(entity);
             _context.SaveChanges();
         }
+        
         public void Remove(int id)
         {
             var entity = GetById(id);
@@ -40,6 +49,7 @@ namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base
                 _context.SaveChanges();
             }
         }
+        
         public void Update(TEntity entity)
         {
             /*

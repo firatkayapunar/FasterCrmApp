@@ -59,7 +59,7 @@
         }
 
         // Döndürülen veri
-        public T? Data { get; } 
+        public T? Data { get; }
 
         // Başarılı durumlar için statik metod
         public static Result<T> SuccessResult(T data, string message = "")
@@ -67,29 +67,28 @@
             return new Result<T>(true, message, data);
         }
 
-        /*
-   Aşağıdaki uyarı, türetilmiş sınıfta aynı isimle bir metot tanımlandığında, dönüş tipleri farklı olsa bile, base sınıftaki metodu gizlediğini derleyicinin fark etmesi nedeniyle oluşuyor. C#'da metotlar yalnızca isimlerine (ve parametre türlerine) göre sınıflandırıldığından, dönüş tipi farklı olsa bile aynı isimde bir metot tanımlandığında "gizleme" (hiding) durumu ortaya çıkar.
+        // Aşağıdaki uyarı, türetilmiş sınıfta aynı isimle bir metot tanımlandığında, dönüş tipleri farklı olsa bile, base sınıftaki metodu gizlediğini derleyicinin fark etmesi nedeniyle oluşuyor. C#'da metotlar yalnızca isimlerine (ve parametre türlerine) göre sınıflandırıldığından, dönüş tipi farklı olsa bile aynı isimde bir metot tanımlandığında "gizleme" (hiding) durumu ortaya çıkar.
 
-  Neden Böyle Bir Uyarı Geliyor?
+        //Neden Böyle Bir Uyarı Geliyor?
 
-  Base sınıfta tanımlanan:
-  public static Result FailureResult(string message, IEnumerable<string> errors)
+        //Base sınıfta tanımlanan:
+        //public static Result FailureResult(string message, IEnumerable<string> errors)
 
-  Derived sınıfta tanımlanan:
-  public static Result<T> FailureResult(string message, IEnumerable<string> errors)
+        //Derived sınıfta tanımlanan:
+        //public static Result<T> FailureResult(string message, IEnumerable<string> errors)
 
-  Bu iki metot aynı imzaya sahiptir (isim ve parametreler aynı olduğu için). Ancak dönüş tipleri farklıdır:
-      - Base sınıftaki Result döndürür.
-      - Derived sınıftaki Result<T> döndürür.
+        //Bu iki metot aynı imzaya sahiptir (isim ve parametreler aynı olduğu için). Ancak dönüş tipleri farklıdır:
+        //- Base sınıftaki Result döndürür.
+        //- Derived sınıftaki Result<T> döndürür.
 
-  Derleyici, dönüş tipini dikkate almadığı için bu iki metot aynı kabul edilir ve türetilmiş sınıftaki metot, base sınıftaki metodu "gizler". Bunun sonucunda derleyici şu uyarıyı verir:
+        //Derleyici, dönüş tipini dikkate almadığı için bu iki metot aynı kabul edilir ve türetilmiş sınıftaki metot, base sınıftaki metodu "gizler".
+        
+        //Bunun sonucunda derleyici şu uyarıyı verir:
+        //Result<T>.FailureResult(string, IEnumerable<string>) hides inherited member Result.FailureResult(string, IEnumerable<string>). Use the new keyword if hiding was intended.
 
-  Result<T>.FailureResult(string, IEnumerable<string>) hides inherited member Result.FailureResult(string, IEnumerable<string>). Use the new keyword if hiding was intended.
+        //Bu uyarı, kodun doğru çalışmasına engel değildir.
 
-  Bu uyarı, kodun doğru çalışmasına engel değildir.
-
-  Eğer base sınıftaki metodu bilerek gizlemek istiyorsak, türetilmiş sınıfta new anahtar sözcüğünü kullanabiliriz. Bu, gizleme işleminin bilinçli bir tercih olduğunu derleyiciye bildirir.
-   */
+        //Eğer base sınıftaki metodu bilerek gizlemek istiyorsak, türetilmiş sınıfta new anahtar sözcüğünü kullanabiliriz. Bu, gizleme işleminin bilinçli bir tercih olduğunu derleyiciye bildirir.
         public static new Result<T> FailureResult(string message, IEnumerable<string> errorMessages)
         {
             return new Result<T>(false, message, null, errorMessages);
