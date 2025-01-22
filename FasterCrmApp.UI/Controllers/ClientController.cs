@@ -5,18 +5,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FasterCrmApp.UI.Controllers
 {
-    [Route("Clients")]
-    public class ClientsController : Controller
+    public class ClientController : Controller
     {
         private readonly IClientService _clientService;
 
-        public ClientsController(IClientService clientService)
+        public ClientController(IClientService clientService)
         {
             _clientService = clientService;
         }
 
-        // GET: Clients/
-        [HttpGet("")]
         public IActionResult Index()
         {
             var result = _clientService.GetList();

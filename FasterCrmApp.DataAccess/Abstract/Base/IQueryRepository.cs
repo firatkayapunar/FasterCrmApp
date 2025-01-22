@@ -1,5 +1,4 @@
 ﻿using FasterCrmApp.Entities.Abstract;
-using System.Linq.Expressions;
 
 namespace FasterCrmApp.DataAccess.Abstract.Base
 {
@@ -8,6 +7,5 @@ namespace FasterCrmApp.DataAccess.Abstract.Base
     {
         TEntity GetById(int id);
         IEnumerable<TEntity> GetAll();
-        IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate);
     }
 }

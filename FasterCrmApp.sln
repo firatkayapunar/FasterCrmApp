@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FasterCrmApp.Entities", "Fa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FasterCrmApp.Models", "FasterCrmApp.Models\FasterCrmApp.Models.csproj", "{0F672924-145F-4577-8155-73CAFDCEF547}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FasterCrmApp.Common", "FasterCrmApp.Common\FasterCrmApp.Common.csproj", "{B4865EE2-D92A-4AA9-80F8-7E2EC52301E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{0F672924-145F-4577-8155-73CAFDCEF547}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F672924-145F-4577-8155-73CAFDCEF547}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F672924-145F-4577-8155-73CAFDCEF547}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4865EE2-D92A-4AA9-80F8-7E2EC52301E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4865EE2-D92A-4AA9-80F8-7E2EC52301E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4865EE2-D92A-4AA9-80F8-7E2EC52301E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4865EE2-D92A-4AA9-80F8-7E2EC52301E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

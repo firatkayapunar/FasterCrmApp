@@ -6,5 +6,6 @@ namespace FasterCrmApp.Entities.Abstract
     {
         [Key]
         public int ID { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

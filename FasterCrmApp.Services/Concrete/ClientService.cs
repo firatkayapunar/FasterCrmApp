@@ -25,18 +25,15 @@ namespace FasterCrmApp.Services.Concrete
             try
             {
                 var client = _mapper.Map<Client>(createClientModel);
-
-                // Validasyonu çalıştırıyoruz
-                ValidationTool.Validate(new ClientValidator(), client);
-
                 client.CreatedAt = DateTime.Now;
+
+                ValidationTool.Validate(new ClientValidator(), client);
 
                 _clientRepository.Add(client);
                 return Result.SuccessResult("Client successfully added.");
             }
             catch (CustomValidationException ex)
             {
-                // CustomValidationException içindeki hataları direkt alıyoruz.
                 return Result.FailureResult("Validation failed.", ex.Errors);
             }
             catch (Exception ex)

@@ -9,5 +9,6 @@ namespace FasterCrmApp.DataAccess.Context.EntityFramework.Context
         { }
 
         public DbSet<Client> Clients { get; set; }
+        public DbSet<Client> Users { get; set; }
     }
 }

@@ -16,6 +16,14 @@
 
             if (errorMessages != null && errorMessages.Any())
             {
+                // new Dictionary<string, IEnumerable<string>> bir sözlük(dictionary) nesnesidir.Bu yapı, anahtar-değer(key - value) çiftleri ile veri depolayan bir koleksiyon türüdür.
+
+                // var errors = new Dictionary<string, IEnumerable<string>>
+                // {
+                //  { "General", new List<string> { "An error occurred.", "Another error occurred." } },
+                //  { "Name", new List<string> { "Name is required.", "Name must be at least 3 characters." } }
+                // };
+
                 Errors = new Dictionary<string, IEnumerable<string>>
                 {
                     { "General", errorMessages }
@@ -82,7 +90,7 @@
         //- Derived sınıftaki Result<T> döndürür.
 
         //Derleyici, dönüş tipini dikkate almadığı için bu iki metot aynı kabul edilir ve türetilmiş sınıftaki metot, base sınıftaki metodu "gizler".
-        
+
         //Bunun sonucunda derleyici şu uyarıyı verir:
         //Result<T>.FailureResult(string, IEnumerable<string>) hides inherited member Result.FailureResult(string, IEnumerable<string>). Use the new keyword if hiding was intended.
 

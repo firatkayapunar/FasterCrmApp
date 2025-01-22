@@ -10,6 +10,5 @@ namespace FasterCrmApp.Entities.Concrete
         public string Description { get; set; } = string.Empty;
         public bool Locked { get; set; }
         public bool IsCorporate { get; set; }
-        public DateTime CreatedAt { get; set; }
     }
 }
