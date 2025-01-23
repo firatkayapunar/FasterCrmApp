@@ -1,12 +1,14 @@
 using FasterCrmApp.Services.ServiceCollectionExtension;
+using FasterCrmApp.DataAccess.ServiceCollectionExtension;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// DependencyInjection sýnýfýndaki extension metodu çaðýrýlýr.
+// DependencyInjection sýnýfýnlarýndaki extension metotlarý çaðýrdýk.
 builder.Services.AddApplicationServices();
+builder.Services.AddDataAccessServices();
 
 builder.Services.AddDistributedMemoryCache();
 

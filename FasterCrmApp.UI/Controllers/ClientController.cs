@@ -1,10 +1,12 @@
 ﻿using FasterCrmApp.Models;
 using FasterCrmApp.Models.Results;
 using FasterCrmApp.Services.Abstract;
+using FasterCrmApp.UI.Filter;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FasterCrmApp.UI.Controllers
 {
+    [SessionCheck("Login", "Account")]
     public class ClientController : ControllerBase
     {
         private readonly IClientService _clientService;
@@ -20,8 +22,8 @@ namespace FasterCrmApp.UI.Controllers
             return View(result);
         }
 
-        // GET: Clients/Search?search=value
-        [HttpGet("Search")]
+        // GET: Client/Search?search=value
+        [HttpGet("Client/Search")]
         public IActionResult Search(string search)
         {
             Result<List<ClientModel>> result;
@@ -34,32 +36,32 @@ namespace FasterCrmApp.UI.Controllers
             return ReturnResult(result);
         }
 
-        // GET: Clients/Details/{id}
-        [HttpGet("Details/{id:int}")]
+        // GET: Client/Details/{id}
+        [HttpGet("Client/Details/{id:int}")]
         public ActionResult Details(int id)
         {
             var result = _clientService.Get(id);
             return ReturnResult(result);
         }
 
-        // POST: Clients/Create
-        [HttpPost("Create")]
+        // POST: Client/Create
+        [HttpPost("Client/Create")]
         public ActionResult Create(CreateClientModel createClientModel)
         {
             var result = _clientService.Add(createClientModel);
             return ReturnResult(result);
         }
 
-        // POST: Clients/Update
-        [HttpPost("Update")]
+        // POST: Client/Update
+        [HttpPost("Client/Update")]
         public ActionResult Update(UpdateClientModel updateClientModel)
         {
             var result = _clientService.Update(updateClientModel);
             return ReturnResult(result);
         }
 
-        // POST: Clients/Delete/{id}
-        [HttpPost("Delete/{clientId:int}")]
+        // POST: Client/Delete/{id}
+        [HttpPost("Client/Delete/{clientId:int}")]
         public ActionResult Delete(int clientId)
         {
             var result = _clientService.Delete(new DeleteClientModel() { ID = clientId });

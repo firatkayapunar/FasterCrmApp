@@ -17,14 +17,14 @@ namespace FasterCrmApp.UI.Controllers
         }
 
         [HttpGet("")]
-        public IActionResult Login()
+        public ActionResult Login()
         {
             return View();
         }
 
-        // POST: Account/Login
-        [HttpPost("Login")]
-        public IActionResult Login(AuthenticateModel authenticateModel)
+        // POST: Account/Create
+        [HttpPost("Account/Login")]
+        public ActionResult Login(AuthenticateModel authenticateModel)
         {
             var result = _userService.Authenticate(authenticateModel);
 
@@ -48,21 +48,11 @@ namespace FasterCrmApp.UI.Controllers
 
             return ReturnResult(result);
         }
-
-        public IActionResult CreateFakeUser()
+      
+        public ActionResult Logout()
         {
-            _userService.Add(new CreateUserModel
-            {
-                Name = "Test",
-                Email = "test.firat@gmail.com",
-                Password = "12345",
-                Locked = false,
-                RePassword = "12345",
-                Role = 1,
-                Username = "Test",
-            });
-
-            return Ok();
+            HttpContext.Session.Clear();
+            return RedirectToAction(nameof(Login));
         }
     }
 }

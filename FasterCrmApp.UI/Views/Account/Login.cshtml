@@ -33,7 +33,7 @@
                 <form role="form" class="text-start">
                     <div class="input-group input-group-outline my-3">
                         <label class="form-label">Kullanıcı Adı</label>
-                        <input id="username" type="text" class="form-control">
+                        <input id="username" type="text" class="form-control" autocomplete="off">
                     </div>
                     <div class="input-group input-group-outline mb-3">
                         <label class="form-label">Şifre</label>
@@ -68,6 +68,8 @@
                 "password": fpassword,
             };
 
+            console.log("Data:",data);
+
             $.ajax({
                 method: "post",
                 url: "/Account/Login",
@@ -97,7 +99,7 @@
                   toastr.success(result.message || "İşlem başarılı!");
 
                   setTimeout(function () {
-                      window.location = "/";
+                      window.location = "/Home/Dashboard";
                   }, 1000);
                 }
             }).fail(function () {

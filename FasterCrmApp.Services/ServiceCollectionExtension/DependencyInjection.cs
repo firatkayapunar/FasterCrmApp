@@ -1,9 +1,5 @@
-﻿using FasterCrmApp.DataAccess.Abstract;
-using FasterCrmApp.DataAccess.Concrete.EntityFramework.Base;
-using FasterCrmApp.DataAccess.Context.EntityFramework.Context;
-using FasterCrmApp.Services.Abstract;
+﻿using FasterCrmApp.Services.Abstract;
 using FasterCrmApp.Services.Concrete;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -55,18 +51,9 @@ namespace FasterCrmApp.Services.ServiceCollectionExtension
             // AutoMapper Entegrasyonu
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-            // DbContext Entegrasyonu
-            services.AddDbContext<DatabaseContext>(options =>
-            {
-                options.UseSqlServer("Data Source=DESKTOP-CS2RH3I;Database=FasterCrmAppDB;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False");
-            });
-
             // Services kayıtları
             services.AddScoped<IClientService, ClientService>();
-            services.AddScoped<IClientRepository, EfClientRepository>();
-
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IUserRepository, EFUserRepository>();
 
             return services;
         }

@@ -30,7 +30,7 @@ namespace FasterCrmApp.Services.Validation.FluentValidation
             // Password alanı boş olamaz ve 100 karakteri geçemez.
             RuleFor(client => client.Password)
                 .NotEmpty().WithMessage("Password cannot be empty.")
-                .MaximumLength(25).WithMessage("Password cannot exceed 100 characters.");
+                .MaximumLength(150).WithMessage("Password cannot exceed 100 characters.");
         }
     }
 }

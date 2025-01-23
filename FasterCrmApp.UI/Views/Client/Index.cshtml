@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Müşteriler";
     ViewData["PageName"] = "clients-index";
+    Layout = "_Layout";
 
     var modals = new List<ModalViewModel>
     {
@@ -189,7 +190,7 @@
 
             $.ajax({
                 method: "post",
-                url: "/Clients/Create",
+                url: "/Client/Create",
                 data: data,
                 beforeSend: function (){
                     modal_body.find(".is-invalid").removeClass("is-invalid");
@@ -277,7 +278,7 @@
 
             $.ajax({
                 method: "post",
-                url: "/Clients/Update",
+                url: "/Client/Update",
                 data: data,
                 beforeSend: function (){
                     modal_body.find(".is-invalid").removeClass("is-invalid");
@@ -317,7 +318,7 @@
 
             $.ajax({
                 method: "post",
-                url : `/Clients/Delete/${clientid}`,
+                url : `/Client/Delete/${clientid}`,
                 beforeSend: function (){
                     $("#loadingSpinner").show();
                 },
@@ -347,7 +348,7 @@
         {
             $.ajax({
                 method : "get",
-                url : `/Clients/Details/${clientid}`
+                url : `/Client/Details/${clientid}`
             }).done(function(result){
                 if (result != null)
                 {
@@ -395,7 +396,7 @@
         {
             $.ajax({
                 method : "get",
-                url : `/Clients/Details/${clientid}`
+                url : `/Client/Details/${clientid}`
             }).done(function(result){
                 if (result != null)
                 {
@@ -431,7 +432,7 @@
 
             $.ajax({
                 method : "get",
-                url : `/Clients/Details/${clientid}`
+                url : `/Client/Details/${clientid}`
             }).done(function(result){
                 if (result != null)
                 {
@@ -510,7 +511,7 @@
         // /Clients/Search?search=john%20doe
         // Bu artık geçerli bir URL'dir.
 
-          const url = '/Clients/Search?search=' + encodeURIComponent(search);
+          const url = '/Client/Search?search=' + encodeURIComponent(search);
 
           $.ajax({
               method: "get",
