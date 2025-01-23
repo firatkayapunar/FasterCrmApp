@@ -8,6 +8,14 @@ builder.Services.AddControllersWithViews();
 // DependencyInjection sýnýfýndaki extension metodu çaðýrýlýr.
 builder.Services.AddApplicationServices();
 
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(opt =>
+{
+    opt.Cookie.Name = "fastercrm.session";
+    opt.IdleTimeout = TimeSpan.FromSeconds(10);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -18,7 +26,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseSession();
+
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();

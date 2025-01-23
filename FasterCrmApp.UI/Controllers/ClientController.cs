@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FasterCrmApp.UI.Controllers
 {
-    public class ClientController : Controller
+    public class ClientController : ControllerBase
     {
         private readonly IClientService _clientService;
 
@@ -64,11 +64,6 @@ namespace FasterCrmApp.UI.Controllers
         {
             var result = _clientService.Delete(new DeleteClientModel() { ID = clientId });
             return ReturnResult(result);
-        }
-
-        private ActionResult ReturnResult(Result result)
-        {
-            return Json(result);
         }
     }
 }

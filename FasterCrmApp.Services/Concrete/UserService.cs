@@ -22,7 +22,7 @@ namespace FasterCrmApp.Services.Concrete
             _mapper = mapper;
         }
 
-        public Result Authenticate(AuthenticateModel authenticateModel)
+        public Result<UserModel> Authenticate(AuthenticateModel authenticateModel)
         {
             try
             {
@@ -31,15 +31,15 @@ namespace FasterCrmApp.Services.Concrete
                 var user = _userRepository.GetAll().Where(x => x.Username.Trim().ToLower() == authenticateModel.Username.ToLower() && x.Password == authenticateModel.Password).FirstOrDefault();
 
                 if (user == null)
-                    return Result.FailureResult("Client not found.", new List<string> { "The client with the given ID does not exist." });
+                    return Result<UserModel>.FailureResult("Client not found.", new List<string> { "The client with the given ID does not exist." });
 
-                var authenticate = _mapper.Map<AuthenticateModel>(user);
+                var userModel = _mapper.Map<UserModel>(user);
 
-                return Result<AuthenticateModel>.SuccessResult(authenticate, "Client retrieved successfully.");
+                return Result<UserModel>.SuccessResult(userModel, "Client retrieved successfully.");
             }
             catch (Exception ex)
             {
-                return Result<AuthenticateModel>.FailureResult("An error occurred.", new List<string> { ex.Message });
+                return Result<UserModel>.FailureResult("An error occurred.", new List<string> { ex.Message });
             }
         }
 
@@ -47,7 +47,7 @@ namespace FasterCrmApp.Services.Concrete
         {
             try
             {
-                if (createUserModel.Password == createUserModel.RePassword)
+                if (createUserModel.Password != createUserModel.RePassword)
                 {
                     var errors = new Dictionary<string, IEnumerable<string>>
                     {

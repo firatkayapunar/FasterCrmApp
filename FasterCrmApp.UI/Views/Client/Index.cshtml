@@ -169,15 +169,16 @@
             // Seçilen checkbox öğesinin işaretli olup olmadığını kontrol eder.
             // Eğer checkbox işaretli ise true, değilse false döner.
 
-            var modal_body = $("#modal-create-client .modal-body");
-            var fname = modal_body.find("#name").val();
-            var femail = modal_body.find("#email").val();
-            var fphone = modal_body.find("#phone").val();
-            var fdescription = modal_body.find("#description").val();
-            var fcorporate = modal_body.find("#iscorporate").is(':checked');
-            var flocked = modal_body.find("#islocked").is(':checked');
+            let modal_body = $("#modal-create-client .modal-body");
+            
+            let fname = modal_body.find("#name").val();
+            let femail = modal_body.find("#email").val();
+            let fphone = modal_body.find("#phone").val();
+            let fdescription = modal_body.find("#description").val();
+            let fcorporate = modal_body.find("#iscorporate").is(':checked');
+            let flocked = modal_body.find("#islocked").is(':checked');
 
-            var data = {
+            let data = {
                 "name": fname,
                 "email": femail,
                 "phone": fphone,
@@ -254,15 +255,15 @@
 
         function updateClient()
         {
-            var modal_body = $("#modal-edit-client .modal-body");
+            let modal_body = $("#modal-edit-client .modal-body");
 
-            var clientId = modal_body.find("#clientid").val();
-            var fname = modal_body.find("#name").val();
-            var femail = modal_body.find("#email").val();
-            var fphone = modal_body.find("#phone").val();
-            var fdescription = modal_body.find("#description").val();
-            var fcorporate = modal_body.find("#iscorporate").is(':checked');
-            var flocked = modal_body.find("#islocked").is(':checked');
+            let clientId = modal_body.find("#clientid").val();
+            let fname = modal_body.find("#name").val();
+            let femail = modal_body.find("#email").val();
+            let fphone = modal_body.find("#phone").val();
+            let fdescription = modal_body.find("#description").val();
+            let fcorporate = modal_body.find("#iscorporate").is(':checked');
+            let flocked = modal_body.find("#islocked").is(':checked');
 
             var data = {
                 "id": clientId,
@@ -350,15 +351,15 @@
             }).done(function(result){
                 if (result != null)
                 {
-                  var modal_body = $("#modal-edit-client .modal-body");
-
-                  var inp_clientid = modal_body.find("#clientid");
-                  var inp_name = modal_body.find("#name");
-                  var inp_email = modal_body.find("#email");
-                  var inp_phone = modal_body.find("#phone");
-                  var inp_description = modal_body.find("#description");
-                  var inp_iscorporate = modal_body.find("#iscorporate");
-                  var inp_islocked = modal_body.find("#islocked");
+                  let modal_body = $("#modal-edit-client .modal-body");
+                  
+                  let inp_clientid = modal_body.find("#clientid");
+                  let inp_name = modal_body.find("#name");
+                  let inp_email = modal_body.find("#email");
+                  let inp_phone = modal_body.find("#phone");
+                  let inp_description = modal_body.find("#description");
+                  let inp_iscorporate = modal_body.find("#iscorporate");
+                  let inp_islocked = modal_body.find("#islocked");
 
                   // 1. Attribute (Öznitelik): Başlangıç değerleri
                   // console.log(textbox.attr('placeholder')); // "Enter your name" -> HTML'deki placeholder
@@ -398,15 +399,15 @@
             }).done(function(result){
                 if (result != null)
                 {
-                  var modal_body = $("#modal-delete-client .modal-body");
+                  let modal_body = $("#modal-delete-client .modal-body");
 
-                  var inp_clientId = modal_body.find("#clientid");
-                  var inp_name = modal_body.find("#name");
-                  var inp_email = modal_body.find("#email");
-                  var inp_phone = modal_body.find("#phone");
-                  var inp_description = modal_body.find("#description");
-                  var inp_iscorporate = modal_body.find("#iscorporate");
-                  var inp_islocked = modal_body.find("#islocked");
+                  let inp_clientId = modal_body.find("#clientid");
+                  let inp_name = modal_body.find("#name");
+                  let inp_email = modal_body.find("#email");
+                  let inp_phone = modal_body.find("#phone");
+                  let inp_description = modal_body.find("#description");
+                  let inp_iscorporate = modal_body.find("#iscorporate");
+                  let inp_islocked = modal_body.find("#islocked");
 
                   inp_clientId.val(result.data.id);
                   inp_name.val(result.data.name);
@@ -434,14 +435,14 @@
             }).done(function(result){
                 if (result != null)
                 {
-                  var modal_body = $("#modal-details-client .modal-body");
-
-                  var inp_name = modal_body.find("#name");
-                  var inp_email = modal_body.find("#email");
-                  var inp_phone = modal_body.find("#phone");
-                  var inp_description = modal_body.find("#description");
-                  var inp_iscorporate = modal_body.find("#iscorporate");
-                  var inp_islocked = modal_body.find("#islocked");
+                  let modal_body = $("#modal-details-client .modal-body");
+                  
+                  let inp_name = modal_body.find("#name");
+                  let inp_email = modal_body.find("#email");
+                  let inp_phone = modal_body.find("#phone");
+                  let inp_description = modal_body.find("#description");
+                  let inp_iscorporate = modal_body.find("#iscorporate");
+                  let inp_islocked = modal_body.find("#islocked");
 
                   inp_name.val(result.data.name);
                   inp_email.val(result.data.email);

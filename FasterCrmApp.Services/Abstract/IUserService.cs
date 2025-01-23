@@ -5,7 +5,7 @@ namespace FasterCrmApp.Services.Abstract
 {
     public interface IUserService
     {
-        Result Authenticate(AuthenticateModel authenticateModel);
+        Result<UserModel> Authenticate(AuthenticateModel authenticateModel);
         Result Add(CreateUserModel createUserModel);
     }
 }
