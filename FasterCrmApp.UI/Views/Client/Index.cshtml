@@ -134,9 +134,9 @@
                                             <span class="text-xs font-weight-bold">@client.CreatedAt</span>
                                         </td>
                                         <td class="text-center align-middle">
-                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-edit-client" class="text-info font-weightbold text-xs me-2" onclick="setEditClientModal(@client.ID)">Düzenle</a>
-                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-details-client" class="text-secondary font-weightbold text-xs me-2" onclick="setDetailsClientModal(@client.ID)">Detay</a>
-                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-delete-client" class="text-danger font-weightbold text-xs me-2" onclick="setDeleteClientModal(@client.ID)">Sil</a>
+                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-edit-client" class="text-info font-weight-bold text-xs me-2" onclick="setClientModal(@client.ID,'edit')">Düzenle</a>
+                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-details-client" class="text-secondary font-weight-bold text-xs me-2" onclick="setClientModal(@client.ID,'details')">Detay</a>
+                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-delete-client" class="text-danger font-weight-bold text-xs me-2" onclick="setClientModal(@client.ID,'delete')">Sil</a>
                                         </td>
                                     </tr>
                                 }
@@ -164,36 +164,50 @@
 
     <script>
 
-        function createClient()
+        // modalElements bir JavaScript nesnesidir ve modal türlerini (örneğin, create, edit, delete, details) modalın CSS seçicileriyle eşleştirir.
+        const modalElements = 
         {
+            create: "#modal-create-client .modal-body",
+            edit: "#modal-edit-client .modal-body",
+            delete: "#modal-delete-client .modal-body",
+            details: "#modal-details-client .modal-body"
+        };
+
+        // Fonksiyona modalType adlı bir parametre veriyoruz. Bu, hangi modal ile çalışılacağını belirler (örneğin: create, edit, delete, veya details).
+        function getClientData(modalType) 
+        {
+            const modalBody = $(modalElements[modalType]);
+
             // .is(':checked'):
             // Seçilen checkbox öğesinin işaretli olup olmadığını kontrol eder.
             // Eğer checkbox işaretli ise true, değilse false döner.
 
-            let modal_body = $("#modal-create-client .modal-body");
-            
-            let fname = modal_body.find("#name").val();
-            let femail = modal_body.find("#email").val();
-            let fphone = modal_body.find("#phone").val();
-            let fdescription = modal_body.find("#description").val();
-            let fcorporate = modal_body.find("#iscorporate").is(':checked');
-            let flocked = modal_body.find("#islocked").is(':checked');
-
-            let data = {
-                "name": fname,
-                "email": femail,
-                "phone": fphone,
-                "description": fdescription,
-                "iscorporate": fcorporate,
-                "locked": flocked
+            const data = {
+                name: modalBody.find("#name").val(),
+                email: modalBody.find("#email").val(),
+                phone: modalBody.find("#phone").val(),
+                description: modalBody.find("#description").val(),
+                isCorporate: modalBody.find("#iscorporate").is(":checked"),
+                locked: modalBody.find("#islocked").is(":checked")
             };
+
+            if (modalType !== "create" || modalType !== "details") 
+                data.clientId = modalBody.find("#clientid").val();
+
+            return data;
+        }
+
+        function createClient()
+        {
+            const modalBody = $(modalElements.create);
+            const data = getClientData("create");
 
             $.ajax({
                 method: "post",
                 url: "/Client/Create",
-                data: data,
+                data,
                 beforeSend: function (){
-                    modal_body.find(".is-invalid").removeClass("is-invalid");
+                    modalBody.find(".is-invalid").removeClass("is-invalid");
                     $("#loadingSpinner").show();
                 },
                 complete: function () {
@@ -203,7 +217,7 @@
                 if (!result.success) {
                    for (var key in result.errors)
                    {
-                     var field = modal_body.find('#' + key.toLowerCase());
+                     const field = modalBody.find('#' + key.toLowerCase());
                      field.parent().addClass("is-invalid");
 
                       // C# nesnesi şu şekilde tanımlanmış olsun:
@@ -237,51 +251,34 @@
 
                      result.errors[key].forEach(function (errorMessage)
                      {
-                         toastr.error(errorMessage, "Hata");
+                         toastr.error(errorMessage);
                      });
                    }
                 }
                 else
                 {
-                  toastr.success(result.message || "İşlem başarılı!");
+                  toastr.success(result.message);
 
                   setTimeout(function () {
                       window.location.reload();
                   }, 1000);
                 }
             }).fail(function () {
-                toastr.error("Sunucuyla bağlantı kurulamadı.", "Hata");
+                toastr.error("A connection to the server could not be established.");
             });
         }
 
         function updateClient()
         {
-            let modal_body = $("#modal-edit-client .modal-body");
-
-            let clientId = modal_body.find("#clientid").val();
-            let fname = modal_body.find("#name").val();
-            let femail = modal_body.find("#email").val();
-            let fphone = modal_body.find("#phone").val();
-            let fdescription = modal_body.find("#description").val();
-            let fcorporate = modal_body.find("#iscorporate").is(':checked');
-            let flocked = modal_body.find("#islocked").is(':checked');
-
-            var data = {
-                "id": clientId,
-                "name": fname,
-                "email": femail,
-                "phone": fphone,
-                "description": fdescription,
-                "iscorporate": fcorporate,
-                "locked": flocked
-            };
+            const modalBody = $(modalElements.edit);
+            const data = getClientData("edit");
 
             $.ajax({
                 method: "post",
                 url: "/Client/Update",
-                data: data,
+                data,
                 beforeSend: function (){
-                    modal_body.find(".is-invalid").removeClass("is-invalid");
+                    modalBody.find(".is-invalid").removeClass("is-invalid");
                     $("#loadingSpinner").show();
                 },
                 complete: function () {
@@ -291,34 +288,34 @@
                  if (!result.success) {
                     for (var key in result.errors)
                     {
-                      var field = modal_body.find('#' + key.toLowerCase());
+                      const field = modalBody.find('#' + key.toLowerCase());
                       field.parent().addClass("is-invalid");
 
                       result.errors[key].forEach(function (errorMessage) {
-                          toastr.error(errorMessage, "Hata");
+                          toastr.error(errorMessage);
                       });
                     }
                 }
                 else
                 {
-                  toastr.success(result.message || "İşlem başarılı!");
+                  toastr.success(result.message);
 
                   setTimeout(function () {
                       window.location.reload();
                   }, 1000);
                 }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
             });
         }
 
          function deleteClient()
          {
-            var modal_body = $("#modal-delete-client .modal-body");
-
-            var clientid = modal_body.find("#clientid").val();
+            const data = getClientData("delete");
 
             $.ajax({
                 method: "post",
-                url : `/Client/Delete/${clientid}`,
+                url : `/Client/Delete/${data.clientId}`,
                 beforeSend: function (){
                     $("#loadingSpinner").show();
                 },
@@ -330,37 +327,50 @@
                  {
                     for(var key in result.errors)
                     {
-                      toastr.error(err.value,"Hata");
+                      result.errors[key].forEach(function (errorMessage) {
+                          toastr.error(errorMessage);
+                      });
                     }
                 }
                 else
                 {
-                  toastr.success(result.message || "İşlem başarılı!");
+                  toastr.success(result.message);
 
                   setTimeout(function () {
                       window.location.reload();
                   }, 1000);
                 }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
             });
         }
 
-        function setEditClientModal(clientid)
-        {
+         function setClientModal(clientId, modalType) 
+         {
             $.ajax({
                 method : "get",
-                url : `/Client/Details/${clientid}`
+                url : `/Client/Details/${clientId}`
             }).done(function(result){
-                if (result != null)
-                {
-                  let modal_body = $("#modal-edit-client .modal-body");
-                  
-                  let inp_clientid = modal_body.find("#clientid");
-                  let inp_name = modal_body.find("#name");
-                  let inp_email = modal_body.find("#email");
-                  let inp_phone = modal_body.find("#phone");
-                  let inp_description = modal_body.find("#description");
-                  let inp_iscorporate = modal_body.find("#iscorporate");
-                  let inp_islocked = modal_body.find("#islocked");
+               
+                  const modalBody = $(modalElements[modalType]);
+
+                  let inp_name = modalBody.find("#name");
+                  let inp_email = modalBody.find("#email");
+                  let inp_phone = modalBody.find("#phone");
+                  let inp_description = modalBody.find("#description");
+                  let inp_iscorporate = modalBody.find("#iscorporate");
+                  let inp_islocked = modalBody.find("#islocked");
+
+                  if (modalType !== "create" || modalType !== "details") 
+                  {
+                    let inp_clientId = modalBody.find("#clientid");
+                    inp_clientId.val(result.data.id);
+                  }
+
+                  inp_name.val(result.data.name);
+                  inp_email.val(result.data.email);
+                  inp_phone.val(result.data.phone);
+                  inp_description.val(result.data.description);
 
                   // 1. Attribute (Öznitelik): Başlangıç değerleri
                   // console.log(textbox.attr('placeholder')); // "Enter your name" -> HTML'deki placeholder
@@ -375,114 +385,19 @@
                   // Yeni durumları kontrol edelim
                   // console.log(textbox.attr('value'));       // "John" -> Başlangıç değeri (HTML'den gelir)
                   // console.log(textbox.prop('value'));       // "Doe" -> Kullanıcının yazdığı yeni değer
-
-                  inp_clientid.val(result.data.id);
-                  inp_name.val(result.data.name);
-                  inp_email.val(result.data.email);
-                  inp_phone.val(result.data.phone);
-                  inp_description.val(result.data.description);
                   inp_iscorporate.prop('checked',result.data.isCorporate);
                   inp_islocked.prop('checked',result.data.locked);
 
-                  if(inp_name.val() != null) inp_name.parent().addClass("is-filled");
-                  if(inp_name.val() != null) inp_email.parent().addClass("is-filled");
-                  if(inp_name.val() != null) inp_phone.parent().addClass("is-filled");
-                  if(inp_name.val() != null) inp_description.parent().addClass("is-filled");
-                }
+                  modalBody.find(".form-control").each(function () {
+                  // this her iterasyonda bir .form-control elemanını temsil eder.
+                  // $(this) ile jQuery objesi olarak işlem yapılabilir.
+                     if ($(this).val().trim() !== "")
+                         $(this).parent().addClass("is-filled");
+                  });
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
             });
         }
-
-        function setDeleteClientModal(clientid)
-        {
-            $.ajax({
-                method : "get",
-                url : `/Client/Details/${clientid}`
-            }).done(function(result){
-                if (result != null)
-                {
-                  let modal_body = $("#modal-delete-client .modal-body");
-
-                  let inp_clientId = modal_body.find("#clientid");
-                  let inp_name = modal_body.find("#name");
-                  let inp_email = modal_body.find("#email");
-                  let inp_phone = modal_body.find("#phone");
-                  let inp_description = modal_body.find("#description");
-                  let inp_iscorporate = modal_body.find("#iscorporate");
-                  let inp_islocked = modal_body.find("#islocked");
-
-                  inp_clientId.val(result.data.id);
-                  inp_name.val(result.data.name);
-                  inp_email.val(result.data.email);
-                  inp_phone.val(result.data.phone);
-                  inp_description.val(result.data.description);
-                  inp_iscorporate.prop('checked',result.data.isCorporate);
-                  inp_islocked.prop('checked',result.data.locked);
-
-                  if(inp_name.val() != null) inp_name.parent().addClass("is-filled");
-                  if(inp_name.val() != null) inp_email.parent().addClass("is-filled");
-                  if(inp_name.val() != null) inp_phone.parent().addClass("is-filled");
-                  if(inp_name.val() != null) inp_description.parent().addClass("is-filled");
-                }
-            });
-        }
-
-        function setDetailsClientModal(clientid)
-        {
-            console.log(clientid);
-
-            $.ajax({
-                method : "get",
-                url : `/Client/Details/${clientid}`
-            }).done(function(result){
-                if (result != null)
-                {
-                  let modal_body = $("#modal-details-client .modal-body");
-                  
-                  let inp_name = modal_body.find("#name");
-                  let inp_email = modal_body.find("#email");
-                  let inp_phone = modal_body.find("#phone");
-                  let inp_description = modal_body.find("#description");
-                  let inp_iscorporate = modal_body.find("#iscorporate");
-                  let inp_islocked = modal_body.find("#islocked");
-
-                  inp_name.val(result.data.name);
-                  inp_email.val(result.data.email);
-                  inp_phone.val(result.data.phone);
-                  inp_description.val(result.data.description);
-                  inp_iscorporate.prop('checked',result.data.isCorporate);
-                  inp_islocked.prop('checked',result.data.locked);
-
-                  if(inp_name.val() != null) inp_name.parent().addClass("is-filled");
-                  if(inp_name.val() != null) inp_email.parent().addClass("is-filled");
-                  if(inp_name.val() != null) inp_phone.parent().addClass("is-filled");
-                  if(inp_name.val() != null) inp_description.parent().addClass("is-filled");
-                }
-            });
-        }
-
-        // Debouncing, bir olayın (örneğin bir giriş alanına yazma gibi) sürekli tetiklenmesi yerine belirli bir süre bekleyerek tek bir işlem yapılmasını sağlar.
-
-        // searchTimeout: Kullanıcı sürekli bir şeyler yazarken önceki işlemleri iptal etmek için kullanılan bir zamanlayıcı değişkeni.
-
-        let searchTimeout;
-
-        // jQuery'nin $() metodu DOM tamamen yüklendiğinde çalışacak işlemleri tanımlar.
-         $(function () {
-
-            // $("#search").on("input", ...): Kullanıcı arama kutusuna bir şey yazdığında çalışır.
-            $("#search").on("input", function ()
-            {
-                const search = $(this).val();
-
-                clearTimeout(searchTimeout);
-
-                // setTimeout asenkron olarak çalışıyor. Arka planda 500 milisaniye bekledikten sonra çalışır. Onun için kilitlenme olmaz ve JavaScript motorunu bloke olmaz.
-                // 1000 milisaniye, 1 saniyedir.
-                searchTimeout = setTimeout(function () {
-                    searchClients(search);
-                }, 1000);
-            });
-        });
 
         function searchClients(search)
         {
@@ -530,11 +445,11 @@
               }
               else
               {
-                  toastr.error(result.message, "Hata");
+                  toastr.error(result.message);
               }
           }).fail(function ()
           {
-              toastr.error("Sunucuyla bağlantı kurulamadı.", "Hata");
+              toastr.error("A connection to the server could not be established.");
           });
         }
 
@@ -590,6 +505,30 @@
                 `);
             }
         }
+
+        // Debouncing, bir olayın (örneğin bir giriş alanına yazma gibi) sürekli tetiklenmesi yerine belirli bir süre bekleyerek tek bir işlem yapılmasını sağlar.
+
+        // searchTimeout: Kullanıcı sürekli bir şeyler yazarken önceki işlemleri iptal etmek için kullanılan bir zamanlayıcı değişkeni.
+
+        let searchTimeout;
+
+        // jQuery'nin $() metodu DOM tamamen yüklendiğinde çalışacak işlemleri tanımlar.
+         $(function () {
+
+            // $("#search").on("input", ...): Kullanıcı arama kutusuna bir şey yazdığında çalışır.
+            $("#search").on("input", function ()
+            {
+                const search = $(this).val();
+
+                clearTimeout(searchTimeout);
+
+                // setTimeout asenkron olarak çalışıyor. Arka planda 500 milisaniye bekledikten sonra çalışır. Onun için kilitlenme olmaz ve JavaScript motorunu bloke olmaz.
+                // 1000 milisaniye, 1 saniyedir.
+                searchTimeout = setTimeout(function () {
+                    searchClients(search);
+                }, 1000);
+            });
+        });
 
     </script>
 }

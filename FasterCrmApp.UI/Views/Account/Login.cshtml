@@ -68,8 +68,6 @@
                 "password": fpassword,
             };
 
-            console.log("Data:",data);
-
             $.ajax({
                 method: "post",
                 url: "/Account/Login",
@@ -90,20 +88,20 @@
 
                      result.errors[key].forEach(function (errorMessage)
                      {
-                         toastr.error(errorMessage, "Hata");
+                         toastr.error(errorMessage);
                      });
                    }
                 }
                 else
                 {
-                  toastr.success(result.message || "İşlem başarılı!");
+                  toastr.success(result.message);
 
                   setTimeout(function () {
                       window.location = "/Home/Dashboard";
                   }, 1000);
                 }
             }).fail(function () {
-                toastr.error("Sunucuyla bağlantı kurulamadı.", "Hata");
+                toastr.error("A connection to the server could not be established.");
             });
         }
 

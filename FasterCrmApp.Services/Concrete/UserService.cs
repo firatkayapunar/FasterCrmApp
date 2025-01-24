@@ -31,11 +31,11 @@ namespace FasterCrmApp.Services.Concrete
                 var user = _userRepository.GetAll().Where(x => x.Username.Trim().ToLower() == authenticateModel.Username.ToLower() && x.Password == authenticateModel.Password).FirstOrDefault();
 
                 if (user == null)
-                    return Result<UserModel>.FailureResult("Client not found.", new List<string> { "The client with the given ID does not exist." });
+                    return Result<UserModel>.FailureResult("User not found.", new List<string> { "The user with the specified credentials does not exist." });
 
                 var userModel = _mapper.Map<UserModel>(user);
 
-                return Result<UserModel>.SuccessResult(userModel, "Client retrieved successfully.");
+                return Result<UserModel>.SuccessResult(userModel, "You have been successfully logged in.");
             }
             catch (Exception ex)
             {
@@ -51,9 +51,9 @@ namespace FasterCrmApp.Services.Concrete
                 {
                     var errors = new Dictionary<string, IEnumerable<string>>
                     {
-                        { "General", new List<string> { "Passwords do not match." } }
+                        { "General", new List<string> { "The passwords provided do not match." } }
                     };
-                    return Result.FailureResult("An error occurred while adding the user.", errors);
+                    return Result.FailureResult("Failed to add the user.", errors);
                 }
 
                 var user = _mapper.Map<User>(createUserModel);
@@ -67,7 +67,7 @@ namespace FasterCrmApp.Services.Concrete
             }
             catch (CustomValidationException ex)
             {
-                return Result.FailureResult("Validation failed.", ex.Errors);
+                return Result.FailureResult("Validation error.", ex.Errors);
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace FasterCrmApp.Services.Concrete
                 {
                     { "General", new List<string> { ex.Message } }
                 };
-                return Result.FailureResult("An error occurred while adding the user.", errors);
+                return Result.FailureResult("An error occurred while adding the client.", errors);
             }
         }
     }

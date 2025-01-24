@@ -15,7 +15,7 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(opt =>
 {
     opt.Cookie.Name = "fastercrm.session";
-    opt.IdleTimeout = TimeSpan.FromSeconds(10);
+    opt.IdleTimeout = TimeSpan.FromMinutes(10);
 });
 
 var app = builder.Build();
