@@ -2,7 +2,7 @@
 
 namespace FasterCrmApp.Entities.Concrete
 {
-    public class Client : BaseEntity
+    public class Client : EntityBase
     {
         public string Name { get; set; } = string.Empty; // John Doe or Arçelik
         public string Email { get; set; } = string.Empty;

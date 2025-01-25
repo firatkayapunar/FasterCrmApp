@@ -1,0 +1,54 @@
+﻿@model UserModalViewModel
+
+<div class="modal fade" id="@Model.ID" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title font-weight-normal" id="@Model.TitleID">@Model.Title</h6>
+                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <partial name="_ModalInputs" model=Model.ModelInputViewModel></partial>
+
+                    @if (Model.ModalName == ModalEnum.Create || Model.ModalName == ModalEnum.ChangeUsername)
+                    {
+                        <div class="input-group input-group-outline my-3">
+                            <label class="form-label">Kullanıcı Adı</label>
+                            <input id="username" type="text" class="form-control">
+                        </div>
+                    }
+
+                    @if (Model.ModalName == ModalEnum.Create || Model.ModalName == ModalEnum.ChangePassword)
+                    {
+                        <div class="input-group input-group-outline my-3">
+                            <label class="form-label">Şifre</label>
+                            <input id="password" type="password" class="form-control">
+                        </div>
+                        <div class="input-group input-group-outline my-3">
+                            <label class="form-label">Şifre (Tekrar)</label>
+                            <input id="repassword" type="password" class="form-control">
+                        </div>
+                    }
+
+                    @if (Model.ModalName == ModalEnum.Details || Model.ModalName == ModalEnum.Delete)
+                    {
+                        <div class="input-group input-group-outline my-3">
+                            <label class="form-label">Kullanıcı Adı</label>
+                            <input id="username" type="text" class="form-control" @(Model.ModelInputViewModel.IsReadonly ? "readonly" : "")>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                @if (!string.IsNullOrEmpty(Model.ActionButtonText))
+                {
+                    <button type="button" class="btn @Model.ActionButtonClass" onclick="@Model.OnActionClick">@Model.ActionButtonText</button>
+                }
+                <button type="button" class="btn btn-link ml-auto" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>

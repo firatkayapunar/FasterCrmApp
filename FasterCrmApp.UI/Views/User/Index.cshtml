@@ -1,0 +1,210 @@
+﻿ @model Result<List<UserModel>>;
+
+@{
+    ViewData["Title"] = "Kullanıcılar";
+    ViewData["PageName"] = "user-index";
+    Layout = "_Layout";
+
+    var modals = new List<UserModalViewModel>
+    {
+        new UserModalViewModel
+        {
+            ID = "modal-create-client",
+            ModalName = ModalEnum.Create,
+            Title = "Yeni Kullanııcı Oluştur",
+            TitleID = "modal-title-create",
+            ActionButtonText = "Kaydet",
+            ActionButtonClass = "bg-gradient-primary",
+            OnActionClick = "createUser()",
+            ModelInputViewModel = new ModalInputViewModel()
+        },
+        new UserModalViewModel
+        {
+            ID = "modal-edit-client",
+            ModalName = ModalEnum.Edit,
+            Title = "Kullanııcı Güncelleme",
+            TitleID = "modal-title-edit",
+            ActionButtonText = "Güncelle",
+            ActionButtonClass = "bg-gradient-warning",
+            OnActionClick = "editUser()",
+            ModelInputViewModel = new ModalInputViewModel { HasID = true }
+        },
+        new UserModalViewModel
+        {
+            ID = "modal-details-user",
+            ModalName = ModalEnum.Details,
+            Title = "Kullanıcı Detayları",
+            TitleID = "modal-title-details",
+            ModelInputViewModel = new ModalInputViewModel { IsReadonly = true, IsDisabled = true }
+        },
+        new UserModalViewModel
+        {
+            ID = "modal-delete-user",
+            ModalName = ModalEnum.Delete,
+            Title = "Kullanıcı Sil (Bazı hataların geri dönüşü olmaz !)",
+            TitleID = "modal-title-delete",
+            ActionButtonText = "Sil",
+            ActionButtonClass = "bg-gradient-danger",
+            OnActionClick = "deleteUser()",
+            ModelInputViewModel = new ModalInputViewModel { IsReadonly = true, IsDisabled = true,HasID = true  }
+        },
+          new UserModalViewModel
+        {
+            ID = "modal-change-username",
+            ModalName = ModalEnum.ChangeUsername,
+            Title = "Kullanıcı Adı Güncelle",
+            TitleID = "modal-title-changeUsername",
+            ActionButtonText = "Kullanıcı Adı Güncelle",
+            ActionButtonClass = "bg-gradient-warning",
+            OnActionClick = "changeUsername()",
+            ModelInputViewModel = new ModalInputViewModel {HasID = true  }
+        },
+          new UserModalViewModel
+        {
+            ID = "modal-change-password",
+            ModalName = ModalEnum.ChangePassword,
+            Title = "Kullanıcı Şifre Güncelle",
+            TitleID = "modal-title-changePassword",
+            ActionButtonText = "Kullanıcı Şifre Güncelle",
+            ActionButtonClass = "bg-gradient-warning",
+            OnActionClick = "changePassword()",
+            ModelInputViewModel = new ModalInputViewModel {HasID = true  }
+        }
+    };
+}
+
+@section Styles {
+    <style>
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+                    <h6 class="text-white text-capitalize ps-3">Kullanıcılar</h6>
+                </div>
+            </div>
+            <div class="card-body px-0 pb-2">
+                <div class="px-4 d-flex justify-content-between">
+                    <div>
+                        <button class="btn btn-icon btn-3 btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-create-user">
+                            <i class="material-symbols-rounded">add</i>
+                            <span>Yeni Kullanıcı</span>
+                        </button>
+                    </div>
+                    <div>
+                        <div class="input-group input-group-sm input-group-outline">
+                            <label class="form-label">Arama</label>
+                            <input id="search" name="search" type="text" class="form-control from-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center justify-content-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ad Soyad</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Kullanıcı Adı</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">E-Posta</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Rolü</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Durumu</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Kayıt Tarihi</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @if (Model.Data == null || Model.Data.Count == 0)
+                            {
+                                <tr>
+                                    <td class="text-center" colspan="6">
+                                        <span class="mb-0 ps-2 text-sm">Herhangi bir kullanıcı bulunamadı.</span>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var user in Model.Data)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex px-2">
+                                                <div class="my-auto">
+                                                    <span class="mb-0 ps-2 text-sm">@user.Name</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="text-sm font-weight-bold mb-0">@user.Username</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-sm font-weight-bold mb-0"><a href="mailto:kaya.asana@gmail.com" target="_blank">@user.Email</a></span>
+                                        </td>
+                                        <td>
+                                            <span class="text-xs font-weight-bold">@FasterCrmApp.Services.Concrete.RoleHelper.GetRoleName((FasterCrmApp.Entities.Enum.Role)user.Role)</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-sm @(user.Locked ? " bg-gradient-secondary" : "bg-gradient-success")">@(user.Locked ? "Pasif" : "Aktif")</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-xs font-weight-bold">@user.CreatedAt</span>
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-edit-user" class="text-info font-weight-bold text-xs me-2" onclick="setUserModal(@user.ID,'edit')">Düzenle</a>
+                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-details-user" class="text-secondary font-weight-bold text-xs me-2" onclick="setUserModal(@user.ID,'details')">Detay</a>
+                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-delete-user" class="text-danger font-weight-bold text-xs me-2" onclick="setUserModal(@user.ID,'delete')">Sil</a>
+                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-change-username" class="text-danger font-weight-bold text-xs me-2" onclick="setChangeUsernameModal(@user.ID,'changeUsername')">Kullanıcı Adı Değiştir</a>
+                                            <a href="javascript:;" data-bs-toggle="modal" data-bs-target="#modal-change-password" class="text-danger font-weight-bold text-xs me-2" onclick="setChangePasswordModal(@user.ID,'changePassword')">Şifre Değiştir</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@foreach (var modal in modals)
+{
+    <partial name="_DynamicModal" model=modal></partial>
+}
+
+<div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Yükleniyor...</span>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+
+        const modalElements =
+        {
+            create: "#modal-create-user .modal-body",
+            edit: "#modal-edit-user .modal-body",
+            delete: "#modal-delete-user .modal-body",
+            details: "#modal-details-user .modal-body"
+            changeUsername: "#modal-change-username .modal-body"
+            changePassword: "#modal-change-password .modal-body"
+        };
+
+    </script>
+}

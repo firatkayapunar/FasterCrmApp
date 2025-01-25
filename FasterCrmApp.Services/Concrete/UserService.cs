@@ -28,7 +28,7 @@ namespace FasterCrmApp.Services.Concrete
             {
                 authenticateModel.Password = (Constants.PasswordSalt + authenticateModel.Password).MD5();
 
-                var user = _userRepository.GetAll().Where(x => x.Username.Trim().ToLower() == authenticateModel.Username.ToLower() && x.Password == authenticateModel.Password).FirstOrDefault();
+                var user = _userRepository.GetAll(x => x.Username.Trim().ToLower() == authenticateModel.Username.ToLower() && x.Password == authenticateModel.Password).FirstOrDefault();
 
                 if (user == null)
                     return Result<UserModel>.FailureResult("User not found.", new List<string> { "The user with the specified credentials does not exist." });
@@ -56,6 +56,8 @@ namespace FasterCrmApp.Services.Concrete
                     return Result.FailureResult("Failed to add the user.", errors);
                 }
 
+                // Note : Role gelen modelde int olarak ayarlandı. Ancak User modelin içinde Role enumı olarak tutuluyor. Bu dönüşümü AutoMapper kendisi yapabiliyor.
+
                 var user = _mapper.Map<User>(createUserModel);
                 user.Password = (Constants.PasswordSalt + user.Password).MD5();
                 user.CreatedAt = DateTime.Now;
@@ -75,7 +77,198 @@ namespace FasterCrmApp.Services.Concrete
                 {
                     { "General", new List<string> { ex.Message } }
                 };
-                return Result.FailureResult("An error occurred while adding the client.", errors);
+                return Result.FailureResult("An error occurred while adding the user.", errors);
+            }
+        }
+
+        public Result Update(UpdateUserModel updateUserModel)
+        {
+            try
+            {
+                var existingUser = _userRepository.GetById(updateUserModel.ID);
+
+                if (existingUser == null)
+                {
+                    var errors = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "ID", new List<string> { "The user with the given ID does not exist." } }
+                    };
+                    return Result.FailureResult("User not found.", errors);
+                }
+
+                var user = _mapper.Map(updateUserModel, existingUser);
+                user.CreatedAt = existingUser.CreatedAt;
+
+                ValidationTool.Validate(new UserValidator(), user);
+
+                _userRepository.Update(user);
+
+                return Result.SuccessResult("User successfully updated.");
+            }
+            catch (CustomValidationException ex)
+            {
+                return Result.FailureResult("Validation failed.", ex.Errors);
+            }
+            catch (Exception ex)
+            {
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while updating the user.", errors);
+            }
+        }
+
+        public Result Delete(DeleteUserModel deleteUserModel)
+        {
+            try
+            {
+                var user = _userRepository.GetById(deleteUserModel.ID);
+
+                if (user == null)
+                {
+                    var errors = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "ID", new List<string> { "The user with the given ID does not exist." } }
+                    };
+                    return Result.FailureResult("User not found.", errors);
+                }
+
+                _userRepository.Remove(user.ID);
+
+                return Result.SuccessResult("User successfully deleted.");
+            }
+            catch (Exception ex)
+            {
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while deleting the user.", errors);
+            }
+        }
+
+        public Result<List<UserModel>> ListBySearch(string search)
+        {
+            try
+            {
+                var users = _userRepository.GetAll(x =>
+                              x.Name.Contains(search) ||
+                              x.Username.Contains(search) ||
+                              x.Email.Contains(search) ||
+                              RoleHelper.GetRoleName(x.Role).Contains(search));
+
+                if (users == null || !users.Any())
+                    return Result<List<UserModel>>.FailureResult("No users found.", new List<string> { "The database contains no users." });
+
+                var userModels = _mapper.Map<List<UserModel>>(users);
+
+                return Result<List<UserModel>>.SuccessResult(userModels.OrderByDescending(x => x.CreatedAt).ToList(), "Users retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<List<UserModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
+            }
+        }
+
+        public Result ChangePassword(int id, ChangePasswordModel changePasswordModel)
+        {
+            try
+            {
+                var user = _userRepository.GetById(id);
+
+                if (user == null)
+                {
+                    var errors = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "ID", new List<string> { "The user with the given ID does not exist." } }
+                    };
+                    return Result.FailureResult("User not found.", errors);
+                }
+
+                if (changePasswordModel.Password != changePasswordModel.RePassword)
+                {
+                    var errors = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "Password", new List<string> { "Passwords do not match." } }
+                    };
+                    return Result.FailureResult("Password change failed.", errors);
+                }
+
+                user.Password = (Constants.PasswordSalt + changePasswordModel.Password).MD5();
+
+                _userRepository.Update(user);
+
+                return Result.SuccessResult("Password successfully changed.");
+            }
+            catch (Exception ex)
+            {
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while changing the password.", errors);
+            }
+        }
+
+        public Result ChangeUsername(int id, ChangeUsernameModel changeUsernameModel)
+        {
+            try
+            {
+                var user = _userRepository.GetById(id);
+
+                if (user == null)
+                {
+                    var errors = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "ID", new List<string> { "The user with the given ID does not exist." } }
+                    };
+                    return Result.FailureResult("User not found.", errors);
+                }
+
+                var usernameExists = _userRepository.GetAll(x => x.Username.Trim().ToLower() == changeUsernameModel.Username.Trim().ToLower() && x.ID != id).Any();
+
+                if (usernameExists)
+                {
+                    var errors = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "Username", new List<string> { "The provided username is already in use." } }
+                    };
+                    return Result.FailureResult("Username change failed.", errors);
+                }
+
+                user.Username = changeUsernameModel.Username.Trim();
+
+                _userRepository.Update(user);
+
+                return Result.SuccessResult("Username successfully changed.");
+            }
+            catch (Exception ex)
+            {
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while changing the username.", errors);
+            }
+        }
+
+        public Result<List<UserModel>> GetList(int id)
+        {
+            try
+            {
+                var users = _userRepository.GetAll(x => x.ID != id);
+
+                if (users == null || !users.Any())
+                    return Result<List<UserModel>>.FailureResult("No users found.", new List<string> { "The database contains no users." });
+
+                var userModels = _mapper.Map<List<UserModel>>(users);
+
+                return Result<List<UserModel>>.SuccessResult(userModels.OrderByDescending(x => x.CreatedAt).ToList(), "Users retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<List<UserModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
             }
         }
     }

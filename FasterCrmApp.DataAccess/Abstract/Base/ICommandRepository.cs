@@ -3,7 +3,7 @@
 namespace FasterCrmApp.DataAccess.Abstract.Base
 {
     public interface ICommandRepository<TEntity>
-                     where TEntity : BaseEntity
+                     where TEntity : EntityBase
     {
         void Add(TEntity entity);
         void Update(TEntity entity);

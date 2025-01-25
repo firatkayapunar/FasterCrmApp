@@ -2,12 +2,12 @@
 
 @{
     ViewData["Title"] = "Müşteriler";
-    ViewData["PageName"] = "clients-index";
+    ViewData["PageName"] = "client-index";
     Layout = "_Layout";
 
-    var modals = new List<ModalViewModel>
+    var modals = new List<ClientModalViewModel>
     {
-        new ModalViewModel
+        new ClientModalViewModel
         {
             ID = "modal-create-client",
             Title = "Yeni Müşteri Oluştur",
@@ -17,7 +17,7 @@
             OnActionClick = "createClient()",
             ModelInputViewModel = new ModalInputViewModel()
         },
-        new ModalViewModel
+        new ClientModalViewModel
         {
             ID = "modal-edit-client",
             Title = "Müşteri Güncelleme",
@@ -25,16 +25,16 @@
             ActionButtonText = "Güncelle",
             ActionButtonClass = "bg-gradient-warning",
             OnActionClick = "updateClient()",
-            ModelInputViewModel = new ModalInputViewModel { HasClientID = true }
+            ModelInputViewModel = new ModalInputViewModel { HasID = true }
         },
-        new ModalViewModel
+        new ClientModalViewModel
         {
             ID = "modal-details-client",
             Title = "Müşteri Detayları",
             TitleID = "modal-title-details",
             ModelInputViewModel = new ModalInputViewModel { IsReadonly = true, IsDisabled = true }
         },
-        new ModalViewModel
+        new ClientModalViewModel
         {
             ID = "modal-delete-client",
             Title = "Müşteri Sil (Bazı hataların geri dönüşü olmaz !)",
@@ -42,7 +42,7 @@
             ActionButtonText = "Sil",
             ActionButtonClass = "bg-gradient-danger",
             OnActionClick = "deleteClient()",
-            ModelInputViewModel = new ModalInputViewModel { IsReadonly = true, IsDisabled = true,HasClientID = true  }
+            ModelInputViewModel = new ModalInputViewModel { IsReadonly = true, IsDisabled = true,HasID = true  }
         }
     };
 }
@@ -177,7 +177,7 @@
         function getClientData(modalType) 
         {
             const modalBody = $(modalElements[modalType]);
-
+            
             // .is(':checked'):
             // Seçilen checkbox öğesinin işaretli olup olmadığını kontrol eder.
             // Eğer checkbox işaretli ise true, değilse false döner.
@@ -354,16 +354,16 @@
                
                   const modalBody = $(modalElements[modalType]);
 
-                  let inp_name = modalBody.find("#name");
-                  let inp_email = modalBody.find("#email");
-                  let inp_phone = modalBody.find("#phone");
-                  let inp_description = modalBody.find("#description");
-                  let inp_iscorporate = modalBody.find("#iscorporate");
-                  let inp_islocked = modalBody.find("#islocked");
+                  const inp_name = modalBody.find("#name");
+                  const inp_email = modalBody.find("#email");
+                  const inp_phone = modalBody.find("#phone");
+                  const inp_description = modalBody.find("#description");
+                  const inp_iscorporate = modalBody.find("#iscorporate");
+                  const inp_islocked = modalBody.find("#islocked");
 
                   if (modalType !== "create" || modalType !== "details") 
                   {
-                    let inp_clientId = modalBody.find("#clientid");
+                    const inp_clientId = modalBody.find("#clientid");
                     inp_clientId.val(result.data.id);
                   }
 
@@ -388,6 +388,7 @@
                   inp_iscorporate.prop('checked',result.data.isCorporate);
                   inp_islocked.prop('checked',result.data.locked);
 
+                  // each, jQuery kütüphanesine özel bir metottur. Sadece jQuery nesneleri üzerinde çalışır.
                   modalBody.find(".form-control").each(function () {
                   // this her iterasyonda bir .form-control elemanını temsil eder.
                   // $(this) ile jQuery objesi olarak işlem yapılabilir.
@@ -522,7 +523,7 @@
 
                 clearTimeout(searchTimeout);
 
-                // setTimeout asenkron olarak çalışıyor. Arka planda 500 milisaniye bekledikten sonra çalışır. Onun için kilitlenme olmaz ve JavaScript motorunu bloke olmaz.
+                // setTimeout asenkron olarak çalışıyor. Arka planda 1000 milisaniye bekledikten sonra çalışır. Onun için kilitlenme olmaz ve JavaScript motorunu bloke olmaz.
                 // 1000 milisaniye, 1 saniyedir.
                 searchTimeout = setTimeout(function () {
                     searchClients(search);

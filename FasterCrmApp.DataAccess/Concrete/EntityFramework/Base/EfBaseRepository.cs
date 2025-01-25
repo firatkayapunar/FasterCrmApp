@@ -7,7 +7,7 @@ namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base
 {
     public class EfBaseRepository<TEntity, TContext> :
                  IRepository<TEntity>
-                 where TEntity : BaseEntity
+                 where TEntity : EntityBase
                  where TContext : DbContext
     {
         private readonly TContext _context;

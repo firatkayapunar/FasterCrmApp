@@ -48,7 +48,7 @@ namespace FasterCrmApp.UI.Controllers
 
             return ReturnResult(result);
         }
-      
+
         public ActionResult Logout()
         {
             HttpContext.Session.Clear();

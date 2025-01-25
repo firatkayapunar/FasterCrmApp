@@ -2,7 +2,7 @@
 
 namespace FasterCrmApp.Entities.Abstract
 {
-    public abstract class BaseEntity
+    public abstract class EntityBase
     {
         [Key]
         public int ID { get; set; }

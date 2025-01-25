@@ -7,7 +7,7 @@ namespace FasterCrmApp.Services.Concrete
         private static readonly Dictionary<Role, string> RoleDescriptions = new Dictionary<Role, string>
         {
             { Role.Admin, "Administrator" },
-            { Role.User, "Regular User" }
+            { Role.User, "User" }
         };
 
         public static string GetRoleName(Role role)
