@@ -5,13 +5,13 @@ using System.Linq.Expressions;
 
 namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base
 {
-    public class EfBaseRepository<TEntity, TContext> :
+    public abstract class EfBaseRepository<TEntity, TContext> :
                  IRepository<TEntity>
                  where TEntity : EntityBase
                  where TContext : DbContext
     {
-        private readonly TContext _context;
-        private readonly DbSet<TEntity> _entity;
+        protected readonly TContext _context;
+        protected readonly DbSet<TEntity> _entity;
 
         public EfBaseRepository(TContext context)
         {
@@ -19,28 +19,28 @@ namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base
             _entity = _context.Set<TEntity>();
         }
 
-        public TEntity GetById(int id)
+        public virtual TEntity GetById(int id)
         {
             return _entity.Find(id);
         }
 
-        public IEnumerable<TEntity> GetAll()
+        public virtual IEnumerable<TEntity> GetAll()
         {
             return _entity.ToList();
         }
 
-        public IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate)
+        public virtual IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate)
         {
             return _entity.Where(predicate);
         }
 
-        public void Add(TEntity entity)
+        public virtual void Add(TEntity entity)
         {
             _entity.Add(entity);
             _context.SaveChanges();
         }
 
-        public void Update(TEntity entity)
+        public virtual void Update(TEntity entity)
         {
             /*
             İzlenen Varlığı Kontrol Etme:
@@ -66,7 +66,7 @@ namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base
             _context.SaveChanges();
         }
 
-        public void Remove(int id)
+        public virtual void Remove(int id)
         {
             var entity = GetById(id);
             if (entity != null)
