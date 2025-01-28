@@ -38,15 +38,15 @@ namespace FasterCrmApp.UI.Controllers
 
         // GET: User/Details/{id}
         [HttpGet("User/Details/{id:int}")]
-        public ActionResult Details(int id)
+        public IActionResult Details(int id)
         {
-            var result = _userService.Get(id);
+            var result = _userService.GetById(id);
             return ReturnResult(result);
         }
 
         // POST: User/Create
         [HttpPost("User/Create")]
-        public ActionResult Create(CreateUserModel createUserModel)
+        public IActionResult Create(CreateUserModel createUserModel)
         {
             var result = _userService.Create(createUserModel);
             return ReturnResult(result);
@@ -54,7 +54,7 @@ namespace FasterCrmApp.UI.Controllers
 
         // POST: User/Update
         [HttpPost("User/Update")]
-        public ActionResult Update(EditUserModel updateUserModel)
+        public IActionResult Update(EditUserModel updateUserModel)
         {
             var result = _userService.Edit(updateUserModel);
             return ReturnResult(result);
@@ -62,7 +62,7 @@ namespace FasterCrmApp.UI.Controllers
 
         // GET: User/ChangeUsername/{id}
         [HttpPost("User/ChangeUsername/{id:int}")]
-        public ActionResult ChangeUsername(int id, ChangeUsernameModel changeUsernameModel)
+        public IActionResult ChangeUsername(int id, ChangeUsernameModel changeUsernameModel)
         {
             var result = _userService.ChangeUsername(id, changeUsernameModel);
             return ReturnResult(result);
@@ -70,7 +70,7 @@ namespace FasterCrmApp.UI.Controllers
 
         // GET: User/ChangePassword/{id}
         [HttpPost("User/ChangePassword/{id:int}")]
-        public ActionResult ChangePassword(int id, ChangePasswordModel changePasswordModel)
+        public IActionResult ChangePassword(int id, ChangePasswordModel changePasswordModel)
         {
             var result = _userService.ChangePassword(id, changePasswordModel);
             return ReturnResult(result);
@@ -78,7 +78,7 @@ namespace FasterCrmApp.UI.Controllers
 
         // POST: User/Delete/{id}
         [HttpPost("User/Delete/{userId:int}")]
-        public ActionResult Delete(int userId)
+        public IActionResult Delete(int userId)
         {
             var result = _userService.Delete(new DeleteUserModel() { ID = userId });
             return ReturnResult(result);

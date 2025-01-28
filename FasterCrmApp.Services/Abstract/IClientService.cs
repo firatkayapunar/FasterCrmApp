@@ -5,7 +5,7 @@ namespace FasterCrmApp.Services.Abstract
 {
     public interface IClientService
     {
-        Result<ClientModel> Get(int id);
+        Result<ClientModel> GetById(int id);
         Result<List<ClientModel>> GetList();
         Result<List<ClientModel>> ListBySearch(string search);
         Result Create(CreateClientModel createClientModel);

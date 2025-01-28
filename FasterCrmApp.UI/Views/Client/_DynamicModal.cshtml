@@ -15,7 +15,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                @if (!string.IsNullOrEmpty(Model.ActionButtonText))
+                @if (!string.IsNullOrWhiteSpace(Model.ActionButtonText))
                 {
                     <button type="button" class="btn @Model.ActionButtonClass" onclick="@Model.OnActionClick">@Model.ActionButtonText</button>
                 }

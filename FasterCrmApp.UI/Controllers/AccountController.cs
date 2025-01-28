@@ -17,14 +17,14 @@ namespace FasterCrmApp.UI.Controllers
         }
 
         [HttpGet("")]
-        public ActionResult Login()
+        public IActionResult Login()
         {
             return View();
         }
 
         // POST: Account/Create
         [HttpPost("Account/Login")]
-        public ActionResult Login(AuthenticateModel authenticateModel)
+        public IActionResult Login(AuthenticateModel authenticateModel)
         {
             var result = _userService.Authenticate(authenticateModel);
 
@@ -33,6 +33,9 @@ namespace FasterCrmApp.UI.Controllers
                 // Kullanıcının adını session'a ekliyoruz.
                 HttpContext.Session.SetString(Constants.Session_Name, result.Data.Name);
 
+                // Rolün int karşılığını session'a ekliyoruz.
+                HttpContext.Session.SetInt32(Constants.Session_RoleValue, result.Data.Role);
+
                 // Kullanıcının rolü int olarak geliyor, enum'a dönüştürüyoruz.
                 var roleEnum = (Role)result.Data.Role;
 
@@ -40,16 +43,16 @@ namespace FasterCrmApp.UI.Controllers
                 var roleName = RoleHelper.GetRoleName(roleEnum);
 
                 // Rolün string karşılığını session'a ekliyoruz.
-                HttpContext.Session.SetString(Constants.Session_Role, roleName);
+                HttpContext.Session.SetString(Constants.Session_RoleName, roleName);
 
                 // Kullanıcının ID'sini session'a ekliyoruz.
-                HttpContext.Session.SetString(Constants.Session_ID, result.Data.ID.ToString());
+                HttpContext.Session.SetInt32(Constants.Session_ID, result.Data.ID);
             }
 
             return ReturnResult(result);
         }
 
-        public ActionResult Logout()
+        public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction(nameof(Login));

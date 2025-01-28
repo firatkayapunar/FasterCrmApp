@@ -6,7 +6,7 @@ namespace FasterCrmApp.Services.Abstract
     public interface IUserService
     {
         Result<UserModel> Authenticate(AuthenticateModel authenticateModel);
-        Result<UserModel> Get(int id);
+        Result<UserModel> GetById(int id);
         Result<List<UserModel>> GetList();
         Result<List<UserModel>> ListBySearch(string search);
         Result Create(CreateUserModel createUserModel);

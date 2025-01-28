@@ -20,16 +20,16 @@ namespace FasterCrmApp.Services.Concrete
             _mapper = mapper;
         }
 
-        public Result<ClientModel> Get(int id)
+        public Result<ClientModel> GetById(int id)
         {
             try
             {
-                var client = _clientRepository.GetById(id);
+                var existingClient = _clientRepository.GetById(id);
 
-                if (client == null)
+                if (existingClient == null)
                     return Result<ClientModel>.FailureResult("Client not found.", new List<string> { "The client with the given ID does not exist." });
 
-                var clientModel = _mapper.Map<ClientModel>(client);
+                var clientModel = _mapper.Map<ClientModel>(existingClient);
 
                 return Result<ClientModel>.SuccessResult(clientModel, "Client retrieved successfully.");
             }
@@ -150,9 +150,9 @@ namespace FasterCrmApp.Services.Concrete
         {
             try
             {
-                var client = _clientRepository.GetById(deleteClientModel.ID);
+                var existingClient = _clientRepository.GetById(deleteClientModel.ID);
 
-                if (client == null)
+                if (existingClient == null)
                 {
                     var errors = new Dictionary<string, IEnumerable<string>>
                     {
@@ -161,7 +161,7 @@ namespace FasterCrmApp.Services.Concrete
                     return Result.FailureResult("Client not found.", errors);
                 }
 
-                _clientRepository.Remove(client.ID);
+                _clientRepository.Remove(existingClient.ID);
 
                 return Result.SuccessResult("Client successfully deleted.");
             }

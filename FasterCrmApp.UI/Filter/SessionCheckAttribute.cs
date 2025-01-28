@@ -18,7 +18,7 @@ namespace FasterCrmApp.UI.Filter
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             //Eğer session'da belirli bir değer yoksa yönlendirme yap dedim.
-            if (string.IsNullOrWhiteSpace(context.HttpContext.Session.GetString(Constants.Session_ID)))
+            if (!context.HttpContext.Session.GetInt32(Constants.Session_ID).HasValue)
             {
                 context.Result = new RedirectToActionResult(
                     _redirectAction,

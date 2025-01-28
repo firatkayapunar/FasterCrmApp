@@ -44,16 +44,16 @@ namespace FasterCrmApp.Services.Concrete
             }
         }
 
-        public Result<UserModel> Get(int id)
+        public Result<UserModel> GetById(int id)
         {
             try
             {
-                var user = _userRepository.GetById(id);
+                var existingClient = _userRepository.GetById(id);
 
-                if (user == null)
+                if (existingClient == null)
                     return Result<UserModel>.FailureResult("User not found.", new List<string> { "The user with the given ID does not exist." });
 
-                var userModel = _mapper.Map<UserModel>(user);
+                var userModel = _mapper.Map<UserModel>(existingClient);
 
                 return Result<UserModel>.SuccessResult(userModel, "User retrieved successfully.");
             }

@@ -38,15 +38,15 @@ namespace FasterCrmApp.UI.Controllers
 
         // GET: Client/Details/{id}
         [HttpGet("Client/Details/{id:int}")]
-        public ActionResult Details(int id)
+        public IActionResult Details(int id)
         {
-            var result = _clientService.Get(id);
+            var result = _clientService.GetById(id);
             return ReturnResult(result);
         }
 
         // POST: Client/Create
         [HttpPost("Client/Create")]
-        public ActionResult Create(CreateClientModel createClientModel)
+        public IActionResult Create(CreateClientModel createClientModel)
         {
             var result = _clientService.Create(createClientModel);
             return ReturnResult(result);
@@ -54,7 +54,7 @@ namespace FasterCrmApp.UI.Controllers
 
         // POST: Client/Update
         [HttpPost("Client/Update")]
-        public ActionResult Update(EditClientModel updateClientModel)
+        public IActionResult Update(EditClientModel updateClientModel)
         {
             var result = _clientService.Edit(updateClientModel);
             return ReturnResult(result);
@@ -62,7 +62,7 @@ namespace FasterCrmApp.UI.Controllers
 
         // POST: Client/Delete/{id}
         [HttpPost("Client/Delete/{clientId:int}")]
-        public ActionResult Delete(int clientId)
+        public IActionResult Delete(int clientId)
         {
             var result = _clientService.Delete(new DeleteClientModel() { ID = clientId });
             return ReturnResult(result);

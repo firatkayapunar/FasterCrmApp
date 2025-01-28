@@ -5,6 +5,7 @@ using FasterCrmApp.Models;
 using FasterCrmApp.Models.Results;
 using FasterCrmApp.Services.Abstract;
 using FasterCrmApp.Services.Validation;
+using FasterCrmApp.Services.Validation.FluentValidation;
 
 namespace FasterCrmApp.Services.Concrete
 {
@@ -19,16 +20,16 @@ namespace FasterCrmApp.Services.Concrete
             _mapper = mapper;
         }
 
-        public Result<IssueModel> Get(int id)
+        public Result<IssueModel> GetById(int id)
         {
             try
             {
-                var issue = _issueRepository.GetById(id);
+                var existingClient = _issueRepository.GetById(id);
 
-                if (issue == null)
+                if (existingClient == null)
                     return Result<IssueModel>.FailureResult("Issue not found.", new List<string> { "The issue with the given ID does not exist." });
 
-                var issueModel = _mapper.Map<IssueModel>(issue);
+                var issueModel = _mapper.Map<IssueModel>(existingClient);
 
                 return Result<IssueModel>.SuccessResult(issueModel, "Issue retrieved successfully.");
             }
@@ -49,6 +50,27 @@ namespace FasterCrmApp.Services.Concrete
 
                 var issueModels = _mapper.Map<List<IssueModel>>(issues);
 
+                return Result<List<IssueModel>>.SuccessResult(issueModels.OrderBy(x => x.Completed).ThenByDescending(x => x.CreatedAt).ToList(), "Issues retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<List<IssueModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
+            }
+        }
+
+        public Result<List<IssueModel>> GetListByUserId(int userId)
+        {
+            try
+            {
+                var existingClient = _issueRepository.GetAll(x =>
+                              x.UserID == userId
+                );
+
+                if (existingClient == null || !existingClient.Any())
+                    return Result<List<IssueModel>>.FailureResult("No issues found.", new List<string> { "The database contains no issues." });
+
+                var issueModels = _mapper.Map<List<IssueModel>>(existingClient);
+
                 return Result<List<IssueModel>>.SuccessResult(issueModels.OrderByDescending(x => x.CreatedAt).ToList(), "Issues retrieved successfully.");
             }
             catch (Exception ex)
@@ -59,17 +81,45 @@ namespace FasterCrmApp.Services.Concrete
 
         public Result<List<IssueModel>> ListBySearch(string search)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var issues = _issueRepository.GetAll(x =>
+                              x.Summary.Contains(search)
+                );
+
+                if (issues == null || !issues.Any())
+                    return Result<List<IssueModel>>.FailureResult("No issues found.", new List<string> { "The database contains no issues." });
+
+                var issueModels = _mapper.Map<List<IssueModel>>(issues);
+
+                return Result<List<IssueModel>>.SuccessResult(issueModels.OrderByDescending(x => x.CreatedAt).ToList(), "Issues retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<List<IssueModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
+            }
         }
 
         public Result<List<IssueModel>> ListBySearch(string search, int userId)
         {
-            throw new NotImplementedException();
-        }
+            try
+            {
+                var issues = _issueRepository.GetAll(x =>
+                              x.UserID == userId &&
+                              x.Summary.Contains(search)
+                );
 
-        public Result<List<IssueModel>> ListByUserId(int userId)
-        {
-            throw new NotImplementedException();
+                if (issues == null || !issues.Any())
+                    return Result<List<IssueModel>>.FailureResult("No issues found.", new List<string> { "The database contains no issues." });
+
+                var issueModels = _mapper.Map<List<IssueModel>>(issues);
+
+                return Result<List<IssueModel>>.SuccessResult(issueModels.OrderByDescending(x => x.CreatedAt).ToList(), "Issues retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<List<IssueModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
+            }
         }
 
         public Result Create(CreateIssueModel createIssueModel)
