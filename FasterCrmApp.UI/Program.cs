@@ -1,5 +1,5 @@
-using FasterCrmApp.Services.ServiceCollectionExtension;
 using FasterCrmApp.DataAccess.ServiceCollectionExtension;
+using FasterCrmApp.Services.ServiceCollectionExtension;
 
 var builder = WebApplication.CreateBuilder(args);
 

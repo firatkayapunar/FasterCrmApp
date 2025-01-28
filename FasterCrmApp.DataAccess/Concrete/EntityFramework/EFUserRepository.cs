@@ -8,11 +8,7 @@ namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base
                  EfBaseRepository<User, DatabaseContext>,
                  IUserRepository
     {
-        private readonly DatabaseContext _context;
-
         public EFUserRepository(DatabaseContext context) : base(context)
-        {
-            _context = context;
-        }
+        { }
     }
 }

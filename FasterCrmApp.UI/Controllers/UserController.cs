@@ -48,15 +48,15 @@ namespace FasterCrmApp.UI.Controllers
         [HttpPost("User/Create")]
         public ActionResult Create(CreateUserModel createUserModel)
         {
-            var result = _userService.Add(createUserModel);
+            var result = _userService.Create(createUserModel);
             return ReturnResult(result);
         }
 
         // POST: User/Update
         [HttpPost("User/Update")]
-        public ActionResult Update(UpdateUserModel updateUserModel)
+        public ActionResult Update(EditUserModel updateUserModel)
         {
-            var result = _userService.Update(updateUserModel);
+            var result = _userService.Edit(updateUserModel);
             return ReturnResult(result);
         }
 
@@ -70,9 +70,9 @@ namespace FasterCrmApp.UI.Controllers
 
         // GET: User/ChangePassword/{id}
         [HttpPost("User/ChangePassword/{id:int}")]
-        public ActionResult ChangePassword(int id,ChangePasswordModel changePasswordModel)
+        public ActionResult ChangePassword(int id, ChangePasswordModel changePasswordModel)
         {
-            var result = _userService.ChangePassword(id,changePasswordModel);
+            var result = _userService.ChangePassword(id, changePasswordModel);
             return ReturnResult(result);
         }
 

@@ -44,7 +44,90 @@ namespace FasterCrmApp.Services.Concrete
             }
         }
 
-        public Result Add(CreateUserModel createUserModel)
+        public Result<UserModel> Get(int id)
+        {
+            try
+            {
+                var user = _userRepository.GetById(id);
+
+                if (user == null)
+                    return Result<UserModel>.FailureResult("User not found.", new List<string> { "The user with the given ID does not exist." });
+
+                var userModel = _mapper.Map<UserModel>(user);
+
+                return Result<UserModel>.SuccessResult(userModel, "User retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<UserModel>.FailureResult("An error occurred.", new List<string> { ex.Message });
+            }
+        }
+
+        public Result<List<UserModel>> GetList()
+        {
+            try
+            {
+                var users = _userRepository.GetAll();
+
+                if (users == null || !users.Any())
+                    return Result<List<UserModel>>.FailureResult("No users found.", new List<string> { "The database contains no users." });
+
+                var userModels = _mapper.Map<List<UserModel>>(users);
+
+                foreach (var userModel in userModels)
+                {
+                    userModel.RoleName = RoleHelper.GetRoleName((Role)userModel.Role);
+                }
+
+                return Result<List<UserModel>>.SuccessResult(userModels.OrderByDescending(x => x.CreatedAt).ToList(), "Users retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<List<UserModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
+            }
+        }
+
+        public Result<List<UserModel>> ListBySearch(string search)
+        {
+            try
+            {
+                var users = _userRepository
+                    .GetAll(x => x.Name.Contains(search)
+                                 || x.Username.Contains(search)
+                                 || x.Email.Contains(search))
+                    .ToList();
+
+                if (!users.Any())
+                {
+                    users = _userRepository
+                        .GetAll()
+                        .ToList()
+                        .Where(x => RoleHelper.GetRoleName(x.Role).Contains(search))
+                        .ToList();
+                }
+
+                if (!users.Any())
+                    return Result<List<UserModel>>.FailureResult("No users found.", new List<string> { "The database contains no users." });
+
+                var userModels = _mapper.Map<List<UserModel>>(users)
+                    .Select(userModel =>
+                    {
+                        userModel.RoleName = RoleHelper.GetRoleName((Role)userModel.Role);
+                        return userModel;
+                    })
+                    .OrderByDescending(x => x.CreatedAt)
+                    .ToList();
+
+                return Result<List<UserModel>>.SuccessResult(userModels, "Users retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<List<UserModel>>.FailureResult("An error occurred while retrieving users.", new List<string> { ex.Message });
+            }
+
+        }
+
+        public Result Create(CreateUserModel createUserModel)
         {
             try
             {
@@ -82,11 +165,11 @@ namespace FasterCrmApp.Services.Concrete
             }
         }
 
-        public Result Update(UpdateUserModel updateUserModel)
+        public Result Edit(EditUserModel editUserModel)
         {
             try
             {
-                var existingUser = _userRepository.GetById(updateUserModel.ID);
+                var existingUser = _userRepository.GetById(editUserModel.ID);
                 var username = existingUser.Username;
 
                 if (existingUser == null)
@@ -98,7 +181,7 @@ namespace FasterCrmApp.Services.Concrete
                     return Result.FailureResult("User not found.", errors);
                 }
 
-                var user = _mapper.Map(updateUserModel, existingUser);
+                var user = _mapper.Map(editUserModel, existingUser);
                 user.CreatedAt = existingUser.CreatedAt;
                 user.Username = username;
 
@@ -149,46 +232,6 @@ namespace FasterCrmApp.Services.Concrete
                 };
                 return Result.FailureResult("An error occurred while deleting the user.", errors);
             }
-        }
-
-        public Result<List<UserModel>> ListBySearch(string search)
-        {
-            try
-            {
-                var users = _userRepository
-                    .GetAll(x => x.Name.Contains(search)
-                                 || x.Username.Contains(search)
-                                 || x.Email.Contains(search))
-                    .ToList();
-
-                if (!users.Any())
-                {
-                    users = _userRepository
-                        .GetAll()
-                        .ToList()
-                        .Where(x => RoleHelper.GetRoleName(x.Role).Contains(search))
-                        .ToList();
-                }
-
-                if (!users.Any())
-                    return Result<List<UserModel>>.FailureResult("No users found.", new List<string> { "The database contains no users." });
-
-                var userModels = _mapper.Map<List<UserModel>>(users)
-                    .Select(userModel =>
-                    {
-                        userModel.RoleName = RoleHelper.GetRoleName((Role)userModel.Role);
-                        return userModel;
-                    })
-                    .OrderByDescending(x => x.CreatedAt)
-                    .ToList();
-
-                return Result<List<UserModel>>.SuccessResult(userModels, "Users retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return Result<List<UserModel>>.FailureResult("An error occurred while retrieving users.", new List<string> { ex.Message });
-            }
-
         }
 
         public Result ChangePassword(int id, ChangePasswordModel changePasswordModel)
@@ -270,49 +313,6 @@ namespace FasterCrmApp.Services.Concrete
                     { "General", new List<string> { ex.Message } }
                 };
                 return Result.FailureResult("An error occurred while changing the username.", errors);
-            }
-        }
-
-        public Result<List<UserModel>> GetList()
-        {
-            try
-            {
-                var users = _userRepository.GetAll();
-
-                if (users == null || !users.Any())
-                    return Result<List<UserModel>>.FailureResult("No users found.", new List<string> { "The database contains no users." });
-
-                var userModels = _mapper.Map<List<UserModel>>(users);
-
-                foreach (var userModel in userModels)
-                {
-                    userModel.RoleName = RoleHelper.GetRoleName((Role)userModel.Role);
-                }
-
-                return Result<List<UserModel>>.SuccessResult(userModels.OrderByDescending(x => x.CreatedAt).ToList(), "Users retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return Result<List<UserModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
-            }
-        }
-
-        public Result<UserModel> Get(int id)
-        {
-            try
-            {
-                var user = _userRepository.GetById(id);
-
-                if (user == null)
-                    return Result<UserModel>.FailureResult("User not found.", new List<string> { "The user with the given ID does not exist." });
-
-                var userModel = _mapper.Map<UserModel>(user);
-
-                return Result<UserModel>.SuccessResult(userModel, "User retrieved successfully.");
-            }
-            catch (Exception ex)
-            {
-                return Result<UserModel>.FailureResult("An error occurred.", new List<string> { ex.Message });
             }
         }
     }

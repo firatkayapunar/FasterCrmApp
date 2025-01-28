@@ -58,7 +58,7 @@ public class CustomValidationException : Exception
 
         // .ToDictionary(...)
         // Gruplandırılmış veriyi bir sözlük(Dictionary) yapısına dönüştürür.
-           
+
         // - group.Key: Sözlüğün anahtarı, PropertyName (alan adı) olur.Örneğin: "Name", "Email".
         // - group.Select(failure => failure.ErrorMessage):
         //   - Gruplardaki her bir hatayı alır ve sadece ErrorMessage değerini seçer.
@@ -66,7 +66,7 @@ public class CustomValidationException : Exception
 
         // Örnek:
         // Gruplanmış veri şu yapıya dönüştürülür:
-           
+
         // {
         //     "Name":  ["Name cannot be empty."],
         //     "Email": ["Email cannot be empty.", "Email format is invalid."]

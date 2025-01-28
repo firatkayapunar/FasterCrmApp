@@ -158,7 +158,7 @@
                                             <span class="text-xs font-weight-bold">@user.RoleName</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge badge-sm @(user.Locked ? " bg-gradient-secondary" : "bg-gradient-success")">@(user.Locked ? "Pasif" : "Aktif")</span>
+                                            <span class="badge badge-sm @(user.IsLocked ? " bg-gradient-secondary" : "bg-gradient-success")">@(user.IsLocked ? "Pasif" : "Aktif")</span>
                                         </td>
                                         <td class="text-center">
                                             <span class="text-xs font-weight-bold">@user.CreatedAt</span>

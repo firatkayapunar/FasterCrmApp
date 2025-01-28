@@ -9,7 +9,7 @@ namespace FasterCrmApp.Services.Profiles
         public UserProfile()
         {
             CreateMap<CreateUserModel, User>().ReverseMap();
-            CreateMap<UpdateUserModel, User>().ReverseMap();
+            CreateMap<EditUserModel, User>().ReverseMap();
             CreateMap<DeleteUserModel, User>().ReverseMap();
             CreateMap<UserModel, User>().ReverseMap();
         }

@@ -48,15 +48,15 @@ namespace FasterCrmApp.UI.Controllers
         [HttpPost("Client/Create")]
         public ActionResult Create(CreateClientModel createClientModel)
         {
-            var result = _clientService.Add(createClientModel);
+            var result = _clientService.Create(createClientModel);
             return ReturnResult(result);
         }
 
         // POST: Client/Update
         [HttpPost("Client/Update")]
-        public ActionResult Update(UpdateClientModel updateClientModel)
+        public ActionResult Update(EditClientModel updateClientModel)
         {
-            var result = _clientService.Update(updateClientModel);
+            var result = _clientService.Edit(updateClientModel);
             return ReturnResult(result);
         }
 

@@ -20,99 +20,6 @@ namespace FasterCrmApp.Services.Concrete
             _mapper = mapper;
         }
 
-        public Result Add(CreateClientModel createClientModel)
-        {
-            try
-            {
-                var client = _mapper.Map<Client>(createClientModel);
-                client.CreatedAt = DateTime.Now;
-
-                ValidationTool.Validate(new ClientValidator(), client);
-
-                _clientRepository.Add(client);
-                return Result.SuccessResult("Client successfully added.");
-            }
-            catch (CustomValidationException ex)
-            {
-                return Result.FailureResult("Validation failed.", ex.Errors);
-            }
-            catch (Exception ex)
-            {
-                var errors = new Dictionary<string, IEnumerable<string>>
-                {
-                    { "General", new List<string> { ex.Message } }
-                };
-                return Result.FailureResult("An error occurred while adding the client.", errors);
-            }
-        }
-
-        public Result Update(UpdateClientModel updateClientModel)
-        {
-            try
-            {
-                var existingClient = _clientRepository.GetById(updateClientModel.ID);
-
-                if (existingClient == null)
-                {
-                    var errors = new Dictionary<string, IEnumerable<string>>
-                    {
-                        { "ID", new List<string> { "The client with the given ID does not exist." } }
-                    };
-                    return Result.FailureResult("Client not found.", errors);
-                }
-
-                var client = _mapper.Map(updateClientModel, existingClient);
-                client.CreatedAt = existingClient.CreatedAt;
-
-                ValidationTool.Validate(new ClientValidator(), client);
-
-                _clientRepository.Update(client);
-
-                return Result.SuccessResult("Client successfully updated.");
-            }
-            catch (CustomValidationException ex)
-            {
-                return Result.FailureResult("Validation failed.", ex.Errors);
-            }
-            catch (Exception ex)
-            {
-                var errors = new Dictionary<string, IEnumerable<string>>
-                {
-                    { "General", new List<string> { ex.Message } }
-                };
-                return Result.FailureResult("An error occurred while updating the client.", errors);
-            }
-        }
-
-        public Result Delete(DeleteClientModel deleteClientModel)
-        {
-            try
-            {
-                var client = _clientRepository.GetById(deleteClientModel.ID);
-
-                if (client == null)
-                {
-                    var errors = new Dictionary<string, IEnumerable<string>>
-                    {
-                        { "ID", new List<string> { "The client with the given ID does not exist." } }
-                    };
-                    return Result.FailureResult("Client not found.", errors);
-                }
-
-                _clientRepository.Remove(client.ID);
-
-                return Result.SuccessResult("Client successfully deleted.");
-            }
-            catch (Exception ex)
-            {
-                var errors = new Dictionary<string, IEnumerable<string>>
-                {
-                    { "General", new List<string> { ex.Message } }
-                };
-                return Result.FailureResult("An error occurred while deleting the client.", errors);
-            }
-        }
-
         public Result<ClientModel> Get(int id)
         {
             try
@@ -172,6 +79,99 @@ namespace FasterCrmApp.Services.Concrete
             catch (Exception ex)
             {
                 return Result<List<ClientModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
+            }
+        }
+
+        public Result Create(CreateClientModel createClientModel)
+        {
+            try
+            {
+                var client = _mapper.Map<Client>(createClientModel);
+                client.CreatedAt = DateTime.Now;
+
+                ValidationTool.Validate(new ClientValidator(), client);
+
+                _clientRepository.Add(client);
+                return Result.SuccessResult("Client successfully added.");
+            }
+            catch (CustomValidationException ex)
+            {
+                return Result.FailureResult("Validation failed.", ex.Errors);
+            }
+            catch (Exception ex)
+            {
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while adding the client.", errors);
+            }
+        }
+
+        public Result Edit(EditClientModel editClientModel)
+        {
+            try
+            {
+                var existingClient = _clientRepository.GetById(editClientModel.ID);
+
+                if (existingClient == null)
+                {
+                    var errors = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "ID", new List<string> { "The client with the given ID does not exist." } }
+                    };
+                    return Result.FailureResult("Client not found.", errors);
+                }
+
+                var client = _mapper.Map(editClientModel, existingClient);
+                client.CreatedAt = existingClient.CreatedAt;
+
+                ValidationTool.Validate(new ClientValidator(), client);
+
+                _clientRepository.Update(client);
+
+                return Result.SuccessResult("Client successfully updated.");
+            }
+            catch (CustomValidationException ex)
+            {
+                return Result.FailureResult("Validation failed.", ex.Errors);
+            }
+            catch (Exception ex)
+            {
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while updating the client.", errors);
+            }
+        }
+
+        public Result Delete(DeleteClientModel deleteClientModel)
+        {
+            try
+            {
+                var client = _clientRepository.GetById(deleteClientModel.ID);
+
+                if (client == null)
+                {
+                    var errors = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "ID", new List<string> { "The client with the given ID does not exist." } }
+                    };
+                    return Result.FailureResult("Client not found.", errors);
+                }
+
+                _clientRepository.Remove(client.ID);
+
+                return Result.SuccessResult("Client successfully deleted.");
+            }
+            catch (Exception ex)
+            {
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while deleting the client.", errors);
             }
         }
     }

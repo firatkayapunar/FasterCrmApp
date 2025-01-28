@@ -128,7 +128,7 @@
                                             <span class="text-xs font-weight-bold">@(client.IsCorporate ? "Kurumsal" : "Bireysel")</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge badge-sm @(client.Locked ? " bg-gradient-secondary" : "bg-gradient-success")">@(client.Locked ? "Pasif" : "Aktif")</span>
+                                            <span class="badge badge-sm @(client.IsLocked ? " bg-gradient-secondary" : "bg-gradient-success")">@(client.IsLocked ? "Pasif" : "Aktif")</span>
                                         </td>
                                         <td class="text-center">
                                             <span class="text-xs font-weight-bold">@client.CreatedAt</span>
@@ -188,7 +188,7 @@
                 phone: modalBody.find("#phone").val(),
                 description: modalBody.find("#description").val(),
                 isCorporate: modalBody.find("#iscorporate").is(":checked"),
-                locked: modalBody.find("#islocked").is(":checked")
+                isLocked: modalBody.find("#islocked").is(":checked")
             };
 
             if (modalType !== "create" || modalType !== "details") 

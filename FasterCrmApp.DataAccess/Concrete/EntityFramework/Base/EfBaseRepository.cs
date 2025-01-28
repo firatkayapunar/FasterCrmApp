@@ -19,37 +19,27 @@ namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base
             _entity = _context.Set<TEntity>();
         }
 
-        public IEnumerable<TEntity> GetAll()
-        {
-            return _entity.ToList();
-        }
-        
         public TEntity GetById(int id)
         {
             return _entity.Find(id);
         }
-        
+
+        public IEnumerable<TEntity> GetAll()
+        {
+            return _entity.ToList();
+        }
+
         public IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate)
         {
             return _entity.Where(predicate);
         }
-        
+
         public void Add(TEntity entity)
         {
             _entity.Add(entity);
             _context.SaveChanges();
         }
-        
-        public void Remove(int id)
-        {
-            var entity = GetById(id);
-            if (entity != null)
-            {
-                _entity.Remove(entity);
-                _context.SaveChanges();
-            }
-        }
-        
+
         public void Update(TEntity entity)
         {
             /*
@@ -74,6 +64,16 @@ namespace FasterCrmApp.DataAccess.Concrete.EntityFramework.Base
             _entity.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
             _context.SaveChanges();
+        }
+
+        public void Remove(int id)
+        {
+            var entity = GetById(id);
+            if (entity != null)
+            {
+                _entity.Remove(entity);
+                _context.SaveChanges();
+            }
         }
     }
 }
