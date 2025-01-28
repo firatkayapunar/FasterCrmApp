@@ -192,7 +192,7 @@
             };
 
             if (modalType !== "create" || modalType !== "details") 
-                data.clientId = modalBody.find("#clientid").val();
+                data.id = modalBody.find("#clientid").val();
 
             return data;
         }
@@ -315,7 +315,7 @@
 
             $.ajax({
                 method: "post",
-                url : `/Client/Delete/${data.clientId}`,
+                url : `/Client/Delete/${data.id}`,
                 beforeSend: function (){
                     $("#loadingSpinner").show();
                 },
@@ -345,11 +345,11 @@
             });
         }
 
-         function setClientModal(clientId, modalType) 
+         function setClientModal(id, modalType) 
          {
             $.ajax({
                 method : "get",
-                url : `/Client/Details/${clientId}`
+                url : `/Client/Details/${id}`
             }).done(function(result){
                
                   const modalBody = $(modalElements[modalType]);
@@ -441,13 +441,9 @@
           }).done(function (result)
           {
               if (result.success)
-              {
                   updateTable(result.data);
-              }
               else
-              {
                   toastr.error(result.message);
-              }
           }).fail(function ()
           {
               toastr.error("A connection to the server could not be established.");
@@ -463,6 +459,8 @@
             if (clients && clients.length > 0)
             {
                 clients.forEach((client) => {
+                    const createdAt = client.createdAt ? new Date(client.createdAt).toLocaleString('tr-TR') : "Bilinmiyor";
+
                     const row = `
                         <tr>
                             <td>
@@ -482,7 +480,7 @@
                                 <span class="badge badge-sm ${client.locked ? "bg-gradient-secondary" : "bg-gradient-success"}">${client.locked ? "Pasif" : "Aktif"}</span>
                             </td>
                             <td class="text-center">
-                                <span class="text-xs font-weight-bold">${client.createdAt}</span>
+                                <span class="text-xs font-weight-bold">${createdAt}</span>
                             </td>
                             <td class="text-center align-middle">
                                 <a href="javascript:;"  data-bs-toggle="modal" data-bs-target="#modal-edit-client" class="text-info font-weight-bold text-xs me-2" onclick="setEditClientModal(${client.id})">Düzenle</a>

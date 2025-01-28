@@ -11,7 +11,8 @@ namespace FasterCrmApp.Services.Abstract
         Result Delete(DeleteUserModel deleteUserModel);
         Result ChangeUsername(int id, ChangeUsernameModel changeUsernameModel);
         Result ChangePassword(int id, ChangePasswordModel changePasswordModel);
-        Result<List<UserModel>> GetList(int id);
+        Result<UserModel> Get(int id);
+        Result<List<UserModel>> GetList();
         Result<List<UserModel>> ListBySearch(string search);
     }
 }

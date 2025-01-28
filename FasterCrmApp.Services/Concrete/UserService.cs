@@ -2,6 +2,7 @@
 using FasterCrmApp.Common;
 using FasterCrmApp.DataAccess.Abstract;
 using FasterCrmApp.Entities.Concrete;
+using FasterCrmApp.Entities.Enum;
 using FasterCrmApp.Models;
 using FasterCrmApp.Models.Results;
 using FasterCrmApp.Services.Abstract;
@@ -86,6 +87,7 @@ namespace FasterCrmApp.Services.Concrete
             try
             {
                 var existingUser = _userRepository.GetById(updateUserModel.ID);
+                var username = existingUser.Username;
 
                 if (existingUser == null)
                 {
@@ -98,6 +100,7 @@ namespace FasterCrmApp.Services.Concrete
 
                 var user = _mapper.Map(updateUserModel, existingUser);
                 user.CreatedAt = existingUser.CreatedAt;
+                user.Username = username;
 
                 ValidationTool.Validate(new UserValidator(), user);
 
@@ -152,23 +155,40 @@ namespace FasterCrmApp.Services.Concrete
         {
             try
             {
-                var users = _userRepository.GetAll(x =>
-                              x.Name.Contains(search) ||
-                              x.Username.Contains(search) ||
-                              x.Email.Contains(search) ||
-                              RoleHelper.GetRoleName(x.Role).Contains(search));
+                var users = _userRepository
+                    .GetAll(x => x.Name.Contains(search)
+                                 || x.Username.Contains(search)
+                                 || x.Email.Contains(search))
+                    .ToList();
 
-                if (users == null || !users.Any())
+                if (!users.Any())
+                {
+                    users = _userRepository
+                        .GetAll()
+                        .ToList()
+                        .Where(x => RoleHelper.GetRoleName(x.Role).Contains(search))
+                        .ToList();
+                }
+
+                if (!users.Any())
                     return Result<List<UserModel>>.FailureResult("No users found.", new List<string> { "The database contains no users." });
 
-                var userModels = _mapper.Map<List<UserModel>>(users);
+                var userModels = _mapper.Map<List<UserModel>>(users)
+                    .Select(userModel =>
+                    {
+                        userModel.RoleName = RoleHelper.GetRoleName((Role)userModel.Role);
+                        return userModel;
+                    })
+                    .OrderByDescending(x => x.CreatedAt)
+                    .ToList();
 
-                return Result<List<UserModel>>.SuccessResult(userModels.OrderByDescending(x => x.CreatedAt).ToList(), "Users retrieved successfully.");
+                return Result<List<UserModel>>.SuccessResult(userModels, "Users retrieved successfully.");
             }
             catch (Exception ex)
             {
-                return Result<List<UserModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
+                return Result<List<UserModel>>.FailureResult("An error occurred while retrieving users.", new List<string> { ex.Message });
             }
+
         }
 
         public Result ChangePassword(int id, ChangePasswordModel changePasswordModel)
@@ -253,22 +273,46 @@ namespace FasterCrmApp.Services.Concrete
             }
         }
 
-        public Result<List<UserModel>> GetList(int id)
+        public Result<List<UserModel>> GetList()
         {
             try
             {
-                var users = _userRepository.GetAll(x => x.ID != id);
+                var users = _userRepository.GetAll();
 
                 if (users == null || !users.Any())
                     return Result<List<UserModel>>.FailureResult("No users found.", new List<string> { "The database contains no users." });
 
                 var userModels = _mapper.Map<List<UserModel>>(users);
 
+                foreach (var userModel in userModels)
+                {
+                    userModel.RoleName = RoleHelper.GetRoleName((Role)userModel.Role);
+                }
+
                 return Result<List<UserModel>>.SuccessResult(userModels.OrderByDescending(x => x.CreatedAt).ToList(), "Users retrieved successfully.");
             }
             catch (Exception ex)
             {
                 return Result<List<UserModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
+            }
+        }
+
+        public Result<UserModel> Get(int id)
+        {
+            try
+            {
+                var user = _userRepository.GetById(id);
+
+                if (user == null)
+                    return Result<UserModel>.FailureResult("User not found.", new List<string> { "The user with the given ID does not exist." });
+
+                var userModel = _mapper.Map<UserModel>(user);
+
+                return Result<UserModel>.SuccessResult(userModel, "User retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<UserModel>.FailureResult("An error occurred.", new List<string> { ex.Message });
             }
         }
     }

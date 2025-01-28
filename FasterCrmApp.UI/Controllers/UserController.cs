@@ -1,10 +1,13 @@
-﻿using FasterCrmApp.Common;
+﻿using FasterCrmApp.Models;
+using FasterCrmApp.Models.Results;
 using FasterCrmApp.Services.Abstract;
+using FasterCrmApp.UI.Filter;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FasterCrmApp.UI.Controllers
 {
-    public class UserController : Controller
+    [SessionCheck("Login", "Account")]
+    public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
 
@@ -15,8 +18,70 @@ namespace FasterCrmApp.UI.Controllers
 
         public IActionResult Index()
         {
-            var result = _userService.GetList(Convert.ToInt16(HttpContext.Session.GetString(Constants.Session_ID)));
+            var result = _userService.GetList();
             return View(result);
+        }
+
+        // GET: User/Search?search=value
+        [HttpGet("User/Search")]
+        public IActionResult Search(string search)
+        {
+            Result<List<UserModel>> result;
+
+            if (string.IsNullOrWhiteSpace(search))
+                result = _userService.GetList();
+            else
+                result = _userService.ListBySearch(search);
+
+            return ReturnResult(result);
+        }
+
+        // GET: User/Details/{id}
+        [HttpGet("User/Details/{id:int}")]
+        public ActionResult Details(int id)
+        {
+            var result = _userService.Get(id);
+            return ReturnResult(result);
+        }
+
+        // POST: User/Create
+        [HttpPost("User/Create")]
+        public ActionResult Create(CreateUserModel createUserModel)
+        {
+            var result = _userService.Add(createUserModel);
+            return ReturnResult(result);
+        }
+
+        // POST: User/Update
+        [HttpPost("User/Update")]
+        public ActionResult Update(UpdateUserModel updateUserModel)
+        {
+            var result = _userService.Update(updateUserModel);
+            return ReturnResult(result);
+        }
+
+        // GET: User/ChangeUsername/{id}
+        [HttpPost("User/ChangeUsername/{id:int}")]
+        public ActionResult ChangeUsername(int id, ChangeUsernameModel changeUsernameModel)
+        {
+            var result = _userService.ChangeUsername(id, changeUsernameModel);
+            return ReturnResult(result);
+        }
+
+        // GET: User/ChangePassword/{id}
+        [HttpPost("User/ChangePassword/{id:int}")]
+        public ActionResult ChangePassword(int id,ChangePasswordModel changePasswordModel)
+        {
+            var result = _userService.ChangePassword(id,changePasswordModel);
+            return ReturnResult(result);
+        }
+
+        // POST: User/Delete/{id}
+        [HttpPost("User/Delete/{userId:int}")]
+        public ActionResult Delete(int userId)
+        {
+            var result = _userService.Delete(new DeleteUserModel() { ID = userId });
+            return ReturnResult(result);
         }
     }
 }
