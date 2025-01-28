@@ -1,0 +1,168 @@
+﻿using AutoMapper;
+using FasterCrmApp.DataAccess.Abstract;
+using FasterCrmApp.Entities.Concrete;
+using FasterCrmApp.Models;
+using FasterCrmApp.Models.Results;
+using FasterCrmApp.Services.Abstract;
+using FasterCrmApp.Services.Validation;
+
+namespace FasterCrmApp.Services.Concrete
+{
+    public class IssueService : IIssueService
+    {
+        private readonly IIssueRepository _issueRepository;
+        private readonly IMapper _mapper;
+
+        public IssueService(IIssueRepository issueRepository, IMapper mapper)
+        {
+            _issueRepository = issueRepository;
+            _mapper = mapper;
+        }
+
+        public Result<IssueModel> Get(int id)
+        {
+            try
+            {
+                var issue = _issueRepository.GetById(id);
+
+                if (issue == null)
+                    return Result<IssueModel>.FailureResult("Issue not found.", new List<string> { "The issue with the given ID does not exist." });
+
+                var issueModel = _mapper.Map<IssueModel>(issue);
+
+                return Result<IssueModel>.SuccessResult(issueModel, "Issue retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<IssueModel>.FailureResult("An error occurred.", new List<string> { ex.Message });
+            }
+        }
+
+        public Result<List<IssueModel>> GetList()
+        {
+            try
+            {
+                var issues = _issueRepository.GetAll();
+
+                if (issues == null || !issues.Any())
+                    return Result<List<IssueModel>>.FailureResult("No issues found.", new List<string> { "The database contains no issues." });
+
+                var issueModels = _mapper.Map<List<IssueModel>>(issues);
+
+                return Result<List<IssueModel>>.SuccessResult(issueModels.OrderByDescending(x => x.CreatedAt).ToList(), "Issues retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<List<IssueModel>>.FailureResult("An error occurred.", new List<string> { ex.Message });
+            }
+        }
+
+        public Result<List<IssueModel>> ListBySearch(string search)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Result<List<IssueModel>> ListBySearch(string search, int userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Result<List<IssueModel>> ListByUserId(int userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Result Create(CreateIssueModel createIssueModel)
+        {
+            try
+            {
+                var issue = _mapper.Map<Issue>(createIssueModel);
+                issue.CreatedAt = DateTime.Now;
+
+                ValidationTool.Validate(new IssueValidator(), issue);
+
+                _issueRepository.Add(issue);
+                return Result.SuccessResult("Issue successfully added.");
+            }
+            catch (CustomValidationException ex)
+            {
+                return Result.FailureResult("Validation failed.", ex.Errors);
+            }
+            catch (Exception ex)
+            {
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while adding the issue.", errors);
+            }
+        }
+
+        public Result Edit(EditIssueModel editIssueModel)
+        {
+            try
+            {
+                var existingIssue = _issueRepository.GetById(editIssueModel.ID);
+
+                if (existingIssue == null)
+                {
+                    var errors = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "ID", new List<string> { "The issue with the given ID does not exist." } }
+                    };
+                    return Result.FailureResult("Issue not found.", errors);
+                }
+
+                var issue = _mapper.Map(editIssueModel, existingIssue);
+                issue.CreatedAt = existingIssue.CreatedAt;
+
+                ValidationTool.Validate(new IssueValidator(), issue);
+
+                _issueRepository.Update(issue);
+
+                return Result.SuccessResult("Issue successfully updated.");
+            }
+            catch (CustomValidationException ex)
+            {
+                return Result.FailureResult("Validation failed.", ex.Errors);
+            }
+            catch (Exception ex)
+            {
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while updating the issue.", errors);
+            }
+        }
+
+        public Result Delete(DeleteIssueModel deleteIssueModel)
+        {
+            try
+            {
+                var issue = _issueRepository.GetById(deleteIssueModel.ID);
+
+                if (issue == null)
+                {
+                    var errors = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "ID", new List<string> { "The issue with the given ID does not exist." } }
+                    };
+                    return Result.FailureResult("Issue not found.", errors);
+                }
+
+                _issueRepository.Remove(issue.ID);
+
+                return Result.SuccessResult("Issue successfully deleted.");
+            }
+            catch (Exception ex)
+            {
+                var errors = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "General", new List<string> { ex.Message } }
+                };
+                return Result.FailureResult("An error occurred while deleting the issue.", errors);
+            }
+        }
+    }
+}
