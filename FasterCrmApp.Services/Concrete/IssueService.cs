@@ -50,7 +50,7 @@ namespace FasterCrmApp.Services.Concrete
 
                 var issueModels = _mapper.Map<List<IssueModel>>(issues);
 
-                return Result<List<IssueModel>>.SuccessResult(issueModels.OrderBy(x => x.Completed).ThenByDescending(x => x.CreatedAt).ToList(), "Issues retrieved successfully.");
+                return Result<List<IssueModel>>.SuccessResult(issueModels.OrderBy(x => x.IsCompleted).ThenByDescending(x => x.CreatedAt).ToList(), "Issues retrieved successfully.");
             }
             catch (Exception ex)
             {

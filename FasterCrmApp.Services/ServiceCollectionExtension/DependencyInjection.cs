@@ -54,6 +54,7 @@ namespace FasterCrmApp.Services.ServiceCollectionExtension
             // Services kayıtları
             services.AddScoped<IClientService, ClientService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IIssueService, IssueService>();
 
             return services;
         }

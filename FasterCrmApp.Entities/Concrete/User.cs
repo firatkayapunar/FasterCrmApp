@@ -7,9 +7,9 @@ namespace FasterCrmApp.Entities.Concrete
     {
         private readonly ICollection<Issue> _issues;
 
-        public User(ICollection<Issue> issues)
+        public User()
         {
-            _issues = issues;
+            _issues = new List<Issue>();
         }
 
         public string Name { get; set; } = string.Empty;

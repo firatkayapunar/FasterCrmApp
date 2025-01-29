@@ -19,6 +19,7 @@ namespace FasterCrmApp.DataAccess.ServiceCollectionExtension
             // Repository kayıtları
             services.AddScoped<IClientRepository, EfClientRepository>();
             services.AddScoped<IUserRepository, EFUserRepository>();
+            services.AddScoped<IIssueRepository, EfIssueRepository>();
 
             return services;
         }
