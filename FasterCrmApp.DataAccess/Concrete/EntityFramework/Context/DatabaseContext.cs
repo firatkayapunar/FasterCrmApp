@@ -1,4 +1,5 @@
-﻿using FasterCrmApp.Entities.Concrete;
+﻿using FasterCrmApp.Entities;
+using FasterCrmApp.Entities.Concrete;
 using Microsoft.EntityFrameworkCore;
 
 namespace FasterCrmApp.DataAccess.Context.EntityFramework.Context
@@ -11,5 +12,7 @@ namespace FasterCrmApp.DataAccess.Context.EntityFramework.Context
         public DbSet<Client> Clients { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Issue> Issues { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Log> Logs { get; set; }
     }
 }

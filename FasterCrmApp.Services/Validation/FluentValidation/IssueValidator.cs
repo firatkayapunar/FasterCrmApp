@@ -1,10 +1,6 @@
 ﻿using FasterCrmApp.Entities.Concrete;
 using FluentValidation;
 
-// Validation  => Doğrulama
-// Validator   => Doğrulayıcı
-// Validate    => Doğrula
-
 namespace FasterCrmApp.Services.Validation.FluentValidation
 {
     internal class IssueValidator : AbstractValidator<Issue>

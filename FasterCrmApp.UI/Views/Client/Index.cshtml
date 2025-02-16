@@ -91,7 +91,7 @@
                     <table class="table align-items-center justify-content-center mb-0">
                         <thead>
                             <tr>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ad Soyad / Şirket Adı</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Ad Soyad / Şirket Adı</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">E-Posta</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Bireysel / Kurumsal</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Durumu</th>
@@ -114,10 +114,10 @@
                                 {
                                     <tr>
                                         <td class="text-center">
-                                            <span class="text-sm font-weight-bold mb-0">@client.Name</span>
+                                            <span class="text-xs font-weight-bold mb-0">@client.Name</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="text-sm font-weight-bold mb-0"><a href="@client.Email" target="_blank">@client.Email</a></span>
+                                            <span class="text-xs font-weight-bold mb-0"><a href="@client.Email" target="_blank">@client.Email</a></span>
                                         </td>
                                         <td class="text-center">
                                             <span class="text-xs font-weight-bold mb-0">@(client.IsCorporate ? "Kurumsal" : "Bireysel")</span>
@@ -128,28 +128,27 @@
                                         <td class="text-center">
                                             <span class="text-sm font-weight-bold mb-0">@client.CreatedAt</span>
                                         </td>
-                                        <td class="text-center align-middle">
-
-                                            <button type="button" class="btn btn-info btn-sm fw-bold text-xs me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-edit-client"
-                                                    onclick="setClientModal(@client.ID, 'edit')">
+                                        <td class="text-center">
+                                            <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-edit-client"
+                                               onclick="setClientModal(@client.ID, 'edit')">
                                                 Düzenle
-                                            </button>
+                                            </a>
 
-                                            <button type="button" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-details-client"
-                                                    onclick="setClientModal(@client.ID, 'details')">
+                                            <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-details-client"
+                                               onclick="setClientModal(@client.ID, 'details')">
                                                 Detay
-                                            </button>
+                                            </a>
 
-                                            <button type="button" class="btn btn-danger btn-sm fw-bold text-xs me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-delete-client"
-                                                    onclick="setClientModal(@client.ID, 'delete')">
+                                            <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-delete-client"
+                                               onclick="setClientModal(@client.ID, 'delete')">
                                                 Sil
-                                            </button>
+                                            </a>
                                         </td>
                                     </tr>
                                 }
@@ -225,7 +224,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function (result) {
-                if (!result.success)
+                if (!result.isSuccess)
                 {
                    for (var key in result.errors)
                    {
@@ -296,7 +295,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function(result){
-                if (!result.success)
+                if (!result.isSuccess)
                 {
                    for (var key in result.errors)
                    {
@@ -335,7 +334,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function(result){
-                if (!result.success)
+                if (!result.isSuccess)
                 {
                    for(var key in result.errors)
                    {
@@ -451,7 +450,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function (result){
-                if (result.success)
+                if (result.isSuccess)
                     updateTable(result.data);
                 else
                     toastr.error(result.message);
@@ -486,29 +485,29 @@
                                 <span class="badge badge-sm ${client.locked ? "bg-gradient-secondary" : "bg-gradient-success"}">${client.locked ? "Pasif" : "Aktif"}</span>
                             </td>
                             <td class="text-center">
-                                <span class="text-sm font-weight-bold mb-0">${client.createdAt}</span>
+                                <span class="text-sm font-weight-bold mb-0">${createdAt}</span>
                             </td>
-                            <td class="text-center align-middle">
-                                <button type="button" class="btn btn-info btn-sm fw-bold text-xs me-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modal-edit-client"
-                                        onclick="setClientModal(${client.id}, 'edit')">
+                            <td class="text-center">
+                                <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-edit-client"
+                                   onclick="setClientModal(${client.id}, 'edit')">
                                     Düzenle
-                                </button>
+                                </a>
 
-                                <button type="button" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modal-details-client"
-                                        onclick="setClientModal(${client.id}, 'details')">
+                                <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-details-client"
+                                   onclick="setClientModal(${client.id}, 'details')">
                                     Detay
-                                </button>
+                                </a>
 
-                                <button type="button" class="btn btn-danger btn-sm fw-bold text-xs me-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modal-delete-client"
-                                        onclick="setClientModal(${client.id}, 'delete')">
+                                <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-delete-client"
+                                   onclick="setClientModal(${client.id}, 'delete')">
                                     Sil
-                                </button>
+                                </a>
                             </td>
                         </tr>
                     `;
@@ -535,7 +534,8 @@
         let searchTimeout;
 
         // jQuery'nin $() metodu DOM tamamen yüklendiğinde çalışacak işlemleri tanımlar.
-        $(function () {
+        $(function ()
+        {
             // $("#search").on("input", ...): Kullanıcı arama kutusuna bir şey yazdığında çalışır.
             $("#search").on("input", function () {
                 const search = $(this).val();

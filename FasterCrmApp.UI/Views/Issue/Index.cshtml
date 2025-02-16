@@ -91,9 +91,9 @@
                     <table class="table align-items-center justify-content-center mb-0">
                         <thead>
                             <tr>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Özet</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7ps-2">Tamamlandı</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7ps-2">Son Tarih</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Özet</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Tamamlandı</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Son Tarih</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Atanan</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Kayıt Tarihi</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2"></th>
@@ -114,42 +114,41 @@
                                 {
                                     <tr>
                                         <td class="text-center">
-                                            <span class="text-xs font-weight-bold mb-0">@issue.Summary</span>
+                                            <span class="text-sm font-weight-bold mb-0">@issue.Summary</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge badge-sm @(issue.IsCompleted ? " bg-gradient-secondary" : "bg-gradient-success")">@(issue.IsCompleted ? "Tamamlandı" : "Tamamlanmadı")</span>
-                                        </td>
-                                        <td>
-                                            <span class="text-xs font-weight-bold mb-0">@issue.DueDate?.ToShortDateString()</span>
-                                        </td>
-                                        <td>
-                                            <span class="text-xs font-weight-bold mb-0">@issue.UserName</span>
+                                            <span class="badge badge-sm @(issue.IsCompleted ? " bg-gradient-success" : "bg-gradient-secondary")">@(issue.IsCompleted ? "Tamamlandı" : "Tamamlanmadı")</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="text-xs font-weight-bold mb-0">@issue.CreatedAt</span>
+                                            <span class="text-sm font-weight-bold mb-0">@issue.DueDate</span>
                                         </td>
-                                        <td class="text-center align-middle">
-
-                                            <button type="button" class="btn btn-info btn-sm fw-bold text-xs me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-edit-client"
-                                                    onclick="setClientModal(@issue.ID, 'edit')">
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@issue.UserName</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@issue.CreatedAt</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-sm me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-edit-issue"
+                                               onclick="setIssueModal(@issue.ID, 'edit')">
                                                 Düzenle
-                                            </button>
+                                            </a>
 
-                                            <button type="button" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-details-client"
-                                                    onclick="setClientModal(@issue.ID, 'details')">
+                                            <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-sm me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-details-issue"
+                                               onclick="setIssueModal(@issue.ID, 'details')">
                                                 Detay
-                                            </button>
+                                            </a>
 
-                                            <button type="button" class="btn btn-danger btn-sm fw-bold text-xs me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-delete-client"
-                                                    onclick="setClientModal(@issue.ID, 'delete')">
+                                            <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-sm me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-delete-issue"
+                                               onclick="setIssueModal(@issue.ID, 'delete')">
                                                 Sil
-                                            </button>
+                                            </a>
                                         </td>
                                     </tr>
                                 }
@@ -217,7 +216,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function (result) {
-                if (!result.success)
+                if (!result.isSuccess)
                 {
                    for (var key in result.errors)
                    {
@@ -260,7 +259,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function(result){
-                if (!result.success)
+                if (!result.isSuccess)
                 {
                    for (var key in result.errors)
                    {
@@ -299,7 +298,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function(result){
-                if (!result.success)
+                if (!result.isSuccess)
                 {
                    for(var key in result.errors)
                    {
@@ -356,7 +355,7 @@
 
         function setIssueModal(id, modalType)
         {
-             loadUserListSelect("modal-edit", function () {
+             loadUserListSelect(modalType, function () {
                $.ajax({
                 method: "get",
                 url: `/Issue/Details/${id}`
@@ -373,15 +372,17 @@
                        if (modalType !== "create" && modalType !== "details")
                        {
                          const inp_issueId = modalBody.find("#issueid");
-                         inp_issueid.val(result.data.id);
+                         inp_issueId.val(result.data.id);
                        }
 
                        inp_summary.val(result.data.summary);
                        inp_duedate.val(result.data.dueDate);
                        inp_completed.prop("checked", result.data.completed);
-                       inp_userid.val(result.data.userId);
+                       inp_userid.val(result.data.userID);
 
                        modalBody.find(".form-control").each(function () {
+                           console.log("this:",$(this));
+                           console.log("this.val:",$(this).val());
                            if ($(this).val().trim() !== "")
                                $(this).parent().addClass("is-filled");
                        });
@@ -406,7 +407,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function (result){
-                if (result.success)
+                if (result.isSuccess)
                     updateTable(result.data);
                 else
                     toastr.error(result.message);
@@ -424,49 +425,49 @@
             if (issues && issues.length > 0)
             {
                 issues.forEach((issue) => {
-                    const createdAt = issue.createdAt ? new Date(issue.createdAt).toLocaleString('tr-TR') : "Bilinmiyor";
-                    const dueDate = issue.dueDate ? new Date(issue.dueDate).toLocaleDateString('tr-TR') : "Belirtilmemiş";
+                    const createdAt = issue.createdAt ? new Date(issue.createdAt).toLocaleString('tr-TR') : "";
+                    const dueDate = issue.dueDate ? new Date(issue.dueDate).toLocaleDateString('tr-TR') : "";
 
                     const row = `
                         <tr>
                             <td class="text-center">
-                                <span class="text-xs font-weight-bold mb-0">${issue.summary}</span>
+                                <span class="text-sm font-weight-bold mb-0">${issue.summary}</span>
                             </td>
                             <td class="text-center">
-                                <span class="badge badge-sm ${issue.completed ? "bg-gradient-secondary" : "bg-gradient-success"}">
+                                <span class="badge badge-sm ${issue.completed ? "bg-gradient-success" : "bg-gradient-secondary"}">
                                     ${issue.completed ? "Tamamlandı" : "Tamamlanmadı"}
                                 </span>
                             </td>
                             <td class="text-center">
-                                <span class="text-xs font-weight-bold mb-0">${issue.dueDate ? new Date(issue.dueDate).toLocaleDateString() : ""}</span>
+                                <span class="text-sm font-weight-bold mb-0">${dueDate}</span>
                             </td>
                             <td class="text-center">
-                                <span class="text-xs font-weight-bold mb-0">${issue.userName}</span>
+                                <span class="text-sm font-weight-bold mb-0">${issue.userName}</span>
                             </td>
                             <td class="text-center">
-                                <span class="text-xs font-weight-bold mb-0">${issue.createdAt ? new Date(issue.createdAt).toLocaleDateString() : ""}</span>
+                                <span class="text-sm font-weight-bold mb-0">${createdAt}</span>
                             </td>
-                            <td class="text-center align-middle">
-                                <button type="button" class="btn btn-info btn-sm fw-bold text-xs me-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modal-edit-issue"
-                                        onclick="setIssueModal(${issue.id}, 'edit')">
-                                    Düzenle
-                                </button>
-                          
-                                <button type="button" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modal-details-issue"
-                                        onclick="setIssueModal(${issue.id}, 'details')">
-                                    Detay
-                                </button>
-                          
-                                <button type="button" class="btn btn-danger btn-sm fw-bold text-xs me-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modal-delete-issue"
-                                        onclick="setIssueModal(${issue.id}, 'delete')">
-                                    Sil
-                                </button>
+                            <td class="text-center">
+                                 <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-sm me-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modal-edit-issue"
+                                    onclick="setIssueModal(${issue.id}, 'edit')">
+                                     Düzenle
+                                 </a>
+
+                                 <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-sm me-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modal-details-issue"
+                                    onclick="setIssueModal(${issue.id}, 'details')">
+                                     Detay
+                                 </a>
+
+                                 <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-sm me-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modal-delete-issue"
+                                    onclick="setIssueModal(${issue.id}, 'delete')">
+                                     Sil
+                                 </a>
                             </td>
                         </tr>
                     `;
@@ -488,7 +489,8 @@
 
         let searchTimeout;
 
-        $(function () {
+        $(function ()
+        {
             $("#search").on("input", function () {
                 const search = $(this).val();
 

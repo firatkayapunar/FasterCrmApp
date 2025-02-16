@@ -15,11 +15,13 @@ namespace FasterCrmApp.Services.Concrete
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly ILogService _logService;
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IMapper mapper)
+        public UserService(IUserRepository userRepository, ILogService logService, IMapper mapper)
         {
             _userRepository = userRepository;
+            _logService = logService;
             _mapper = mapper;
         }
 
@@ -36,6 +38,15 @@ namespace FasterCrmApp.Services.Concrete
 
                 var userModel = _mapper.Map<UserModel>(user);
 
+                // Aslında burada Unit of Work pattern kullanarak, User authenticate işlemi sırasında herhangi bir sorun yaşanmazken, Log eklenirken bir hata oluştuğu durumu kontrol altına almamız ve işlemi transaction ile yönetmemiz gerekirdi. Böylece, herhangi bir aşamada hata meydana geldiğinde tüm işlemler geri alınarak (rollback) veri bütünlüğü korunmuş olur.
+
+                _logService.Create(new CreateLogModel
+                {
+                    Text = "Sistem çıkışı yapıldı.",
+                    LogType = (int)LogType.SystemLogin,
+                    UserID = userModel.ID
+                });
+
                 return Result<UserModel>.SuccessResult(userModel, "You have been successfully logged in.");
             }
             catch (Exception ex)
@@ -43,7 +54,7 @@ namespace FasterCrmApp.Services.Concrete
                 return Result<UserModel>.FailureResult("An error occurred.", new List<string> { ex.Message });
             }
         }
-
+       
         public Result<UserModel> GetById(int id)
         {
             try
@@ -70,7 +81,7 @@ namespace FasterCrmApp.Services.Concrete
                 var users = _userRepository.GetAll();
 
                 if (users == null || !users.Any())
-                    return Result<List<UserModel>>.FailureResult("No users found.", new List<string> { "The database contains no users." });
+                    return Result<List<UserModel>>.SuccessResult(new List<UserModel>(), "No users found.");
 
                 var userModels = _mapper.Map<List<UserModel>>(users);
 
@@ -106,8 +117,8 @@ namespace FasterCrmApp.Services.Concrete
                         .ToList();
                 }
 
-                if (!users.Any())
-                    return Result<List<UserModel>>.FailureResult("No users found.", new List<string> { "The database contains no users." });
+                if (users == null || !users.Any())
+                    return Result<List<UserModel>>.SuccessResult(new List<UserModel>(), "No users found.");
 
                 var userModels = _mapper.Map<List<UserModel>>(users)
                     .Select(userModel =>
@@ -124,7 +135,6 @@ namespace FasterCrmApp.Services.Concrete
             {
                 return Result<List<UserModel>>.FailureResult("An error occurred while retrieving users.", new List<string> { ex.Message });
             }
-
         }
 
         public Result Create(CreateUserModel createUserModel)
@@ -144,7 +154,6 @@ namespace FasterCrmApp.Services.Concrete
 
                 var user = _mapper.Map<User>(createUserModel);
                 user.Password = (Constants.PasswordSalt + user.Password).MD5();
-                user.CreatedAt = DateTime.Now;
 
                 ValidationTool.Validate(new UserValidator(), user);
 
@@ -286,6 +295,7 @@ namespace FasterCrmApp.Services.Concrete
                     {
                         { "ID", new List<string> { "The user with the given ID does not exist." } }
                     };
+
                     return Result.FailureResult("User not found.", errors);
                 }
 
@@ -297,6 +307,7 @@ namespace FasterCrmApp.Services.Concrete
                     {
                         { "Username", new List<string> { "The provided username is already in use." } }
                     };
+
                     return Result.FailureResult("Username change failed.", errors);
                 }
 

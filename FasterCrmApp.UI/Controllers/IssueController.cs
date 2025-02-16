@@ -44,16 +44,19 @@ namespace FasterCrmApp.UI.Controllers
             var role = HttpContext.Session.GetInt32(Constants.Session_RoleValue);
             var userId = HttpContext.Session.GetInt32(Constants.Session_ID);
 
-            if (string.IsNullOrWhiteSpace(search))
+            if (role == (int)Role.Admin)
             {
-                result = _issueService.GetList();
+                if (string.IsNullOrWhiteSpace(search))
+                    result = _issueService.GetList();
+                else
+                    result = _issueService.ListBySearch(search);
             }
             else
             {
-                if (role == (int)Role.Admin)
-                    result = _issueService.ListBySearch(search);
+                if (string.IsNullOrWhiteSpace(search))
+                    result = _issueService.GetListByUserId(userId ?? 0);
                 else
-                    result = _issueService.ListBySearch(search, userId ?? 0);
+                    result = _issueService.ListBySearch(search,userId ?? 0);
             }
 
             return ReturnResult(result);
@@ -67,7 +70,7 @@ namespace FasterCrmApp.UI.Controllers
             return ReturnResult(result);
         }
 
-        public ActionResult GetUserList()
+        public ActionResult GetUserList() 
         {
             var role = HttpContext.Session.GetInt32(Constants.Session_RoleValue);
             var userId = HttpContext.Session.GetInt32(Constants.Session_ID);
@@ -94,17 +97,17 @@ namespace FasterCrmApp.UI.Controllers
 
         // POST: Issue/Update
         [HttpPost("Issue/Update")]
-        public IActionResult Update(EditIssueModel updateIssueModel)
+        public IActionResult Update(EditIssueModel editIssueModel)
         {
-            var result = _issueService.Edit(updateIssueModel);
+            var result = _issueService.Edit(editIssueModel);
             return ReturnResult(result);
         }
 
         // POST: Issue/Delete/{id}
         [HttpPost("Issue/Delete/{issueId:int}")]
-        public IActionResult Delete(int issueId)
+        public IActionResult Delete(int issueID)
         {
-            var result = _issueService.Delete(new DeleteIssueModel() { ID = issueId });
+            var result = _issueService.Delete(new DeleteIssueModel() { ID = issueID });
             return ReturnResult(result);
         }
     }

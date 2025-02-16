@@ -20,6 +20,8 @@ namespace FasterCrmApp.DataAccess.ServiceCollectionExtension
             services.AddScoped<IClientRepository, EfClientRepository>();
             services.AddScoped<IUserRepository, EFUserRepository>();
             services.AddScoped<IIssueRepository, EfIssueRepository>();
+            services.AddScoped<INotificationRepository, EfNotificationRepository>();
+            services.AddScoped<ILogRepository, EfLogRepository>();
 
             return services;
         }

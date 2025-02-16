@@ -1,6 +1,7 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutEmpty.cshtml";
-    ViewData["title"] = "Giriş";
+    ViewData["Title"] = "Giriş";
+    ViewData["PageName"] = "account-login";
 }
 
 @section Styles {
@@ -80,7 +81,10 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function (result) {
-                if (!result.success) {
+
+                console.log("Login",result);
+
+                if (!result.isSuccess) {
                    for (var key in result.errors)
                    {
                      var field = $('#' + key.toLowerCase());

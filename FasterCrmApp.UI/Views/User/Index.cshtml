@@ -117,7 +117,7 @@
                     <table class="table align-items-center justify-content-center mb-0">
                         <thead>
                             <tr>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ad Soyad</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Ad Soyad</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Kullanıcı Adı</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">E-Posta</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Rolü</th>
@@ -149,7 +149,7 @@
                                         <td class="text-center">
                                             <span class="text-sm font-weight-bold mb-0"><a href="@user.Email" target="_blank">@user.Email</a></span>
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             <span class="text-sm font-weight-bold mb-0">@user.RoleName</span>
                                         </td>
                                         <td class="text-center">
@@ -158,41 +158,41 @@
                                         <td class="text-center">
                                             <span class="text-sm font-weight-bold mb-0">@user.CreatedAt</span>
                                         </td>
-                                        <td class="text-center align-middle">
-                                            <button type="button" class="btn btn-info btn-sm fw-bold text-xs me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-edit-user"
-                                                    onclick="setUserModal(@user.ID, 'edit')">
+                                        <td class="text-center">
+                                            <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-edit-user"
+                                               onclick="setUserModal(@user.ID, 'edit')">
                                                 Düzenle
-                                            </button>
+                                            </a>
 
-                                            <button type="button" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-details-user"
-                                                    onclick="setUserModal(@user.ID, 'details')">
+                                            <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-details-user"
+                                               onclick="setUserModal(@user.ID, 'details')">
                                                 Detay
-                                            </button>
+                                            </a>
 
-                                            <button type="button" class="btn btn-danger btn-sm fw-bold text-xs me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-delete-user"
-                                                    onclick="setUserModal(@user.ID, 'delete')">
+                                            <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-delete-user"
+                                               onclick="setUserModal(@user.ID, 'delete')">
                                                 Sil
-                                            </button>
+                                            </a>
 
-                                            <button type="button" class="btn btn-warning btn-sm fw-bold text-xs me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-change-username"
-                                                    onclick="setUserModal(@user.ID, 'changeUsername')">
+                                            <a href="javascript:;" class="btn btn-warning btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-change-username"
+                                               onclick="setUserModal(@user.ID, 'changeUsername')">
                                                 Kullanıcı Adı Değiştir
-                                            </button>
+                                            </a>
 
-                                            <button type="button" class="btn btn-dark btn-sm fw-bold text-xs me-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modal-change-password"
-                                                    onclick="setUserModal(@user.ID, 'changePassword')">
+                                            <a href="javascript:;" class="btn btn-dark btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-change-password"
+                                               onclick="setUserModal(@user.ID, 'changePassword')">
                                                 Şifre Değiştir
-                                            </button>
+                                            </a>
                                         </td>
                                     </tr>
                                 }
@@ -231,26 +231,26 @@
         function getUserData(modalType)
         {
             const modalBody = $(modalElements[modalType]);
-        
+
             const data = {
                 name: modalBody.find("#name").val(),
                 email: modalBody.find("#email").val(),
                 isLocked: modalBody.find("#islocked").is(":checked"),
                 role: modalBody.find("#role").val()
             };
-        
-            if (modalType === "create" || modalType ===     "changeUsername"modalTyp=="details" || modalType === "delete")
+
+            if (modalType === "create" || modalType === "changeUsername" || modalType === "details" || modalType === "delete")
                 data.username = modalBody.find("#username").val();
 
             if (modalType !== "create" || modalType !== "details")
                data.id = modalBody.find("#userid").val();
-            
+
             if (modalType === "create" || modalType === "changePassword")
             {
                 data.password = modalBody.find("#password").val();
                 data.repassword = modalBody.find("#repassword").val();
             }
-        
+
             return data;
         }
 
@@ -271,15 +271,14 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function (result) {
-                if (!result.success)
+                if (!result.isSuccess)
                 {
                    for (var key in result.errors)
                    {
                     const field = modalBody.find('#' + key.toLowerCase());
                     field.parent().addClass("is-invalid");
 
-                    result.errors[key].forEach(function (errorMessage)
-                    {
+                    result.errors[key].forEach(function (errorMessage){
                         toastr.error(errorMessage);
                     });
                    }
@@ -314,7 +313,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function(result){
-                if (!result.success)
+                if (!result.isSuccess)
                 {
                    for (var key in result.errors)
                    {
@@ -329,7 +328,7 @@
                 else
                 {
                    toastr.success(result.message);
-                   
+
                    setTimeout(function () {
                        window.location.reload();
                    }, 1000);
@@ -342,7 +341,7 @@
         function deleteUser()
         {
             const data = getUserData("delete");
-        
+
             $.ajax({
                 method: "post",
                 url : `/User/Delete/${data.id}`,
@@ -353,7 +352,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function(result){
-                if (!result.success)
+                if (!result.isSuccess)
                 {
                    for(var key in result.errors)
                    {
@@ -365,7 +364,7 @@
                 else
                 {
                    toastr.success(result.message);
-                   
+
                    setTimeout(function () {
                        window.location.reload();
                    }, 1000);
@@ -437,7 +436,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function (result){
-                if (result.success)
+                if (result.isSuccess)
                     updateTable(result.data);
                 else
                     toastr.error(result.message);
@@ -446,7 +445,7 @@
             });
         }
 
-        function updateTable(users) 
+        function updateTable(users)
         {
             const tbody = $("table tbody");
 
@@ -479,43 +478,43 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                <span class="text-sm font-weight-bold mb-0">${user.createdAt}</span>
+                                <span class="text-sm font-weight-bold mb-0">${createdAt}</span>
                             </td>
-                            <td class="text-center align-middle">
-                                <button type="button" class="btn btn-info btn-sm fw-bold text-xs me-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modal-edit-user"
-                                        onclick="setUserModal(${user.id}, 'edit')">
+                            <td class="text-center">
+                                <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-edit-user"
+                                   onclick="setUserModal(${user.id}, 'edit')">
                                     Düzenle
-                                </button>           
-                            
-                                <button type="button" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modal-details-user"
-                                        onclick="setUserModal(${user.id}, 'details')">
+                                </a>
+
+                                <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-details-user"
+                                   onclick="setUserModal(${user.id}, 'details')">
                                     Detay
-                                </button>           
-                            
-                                <button type="button" class="btn btn-danger btn-sm fw-bold text-xs me-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modal-delete-user"
-                                        onclick="setUserModal(${user.id}, 'delete')">
+                                </a>
+
+                                <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-delete-user"
+                                   onclick="setUserModal(${user.id}, 'delete')">
                                     Sil
-                                </button>           
-                            
-                                <button type="button" class="btn btn-warning btn-sm fw-bold text-xs me-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modal-change-username"
-                                        onclick="setUserModal(${user.id}, 'changeUsername')">
+                                </a>
+
+                                <a href="javascript:;" class="btn btn-warning btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-change-username"
+                                   onclick="setUserModal(${user.id}, 'changeUsername')">
                                     Kullanıcı Adı Değiştir
-                                </button>           
-                            
-                                <button type="button" class="btn btn-dark btn-sm fw-bold text-xs me-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modal-change-password"
-                                        onclick="setUserModal(${user.id}, 'changePassword')">
+                                </a>
+
+                                <a href="javascript:;" class="btn btn-dark btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-change-password"
+                                   onclick="setUserModal(${user.id}, 'changePassword')">
                                     Şifre Değiştir
-                                </button>
+                                </a>
                             </td>
                         </tr>
                     `;
@@ -537,7 +536,8 @@
 
         let searchTimeout;
 
-        $(function () {
+        $(function ()
+        {
            $("#search").on("input", function () {
                const search = $(this).val();
 
@@ -566,7 +566,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function(result){
-                if (!result.success)
+                if (!result.isSuccess)
                 {
                    for (var key in result.errors)
                    {
@@ -582,7 +582,7 @@
                 else
                 {
                    toastr.success(result.message);
-                   
+
                    setTimeout(function () {
                        window.location.reload();
                    }, 1000);
@@ -609,7 +609,7 @@
                     $("#loadingSpinner").hide();
                 }
             }).done(function(result){
-                if (!result.success)
+                if (!result.isSuccess)
                  {
                     for (var key in result.errors)
                     {
@@ -624,7 +624,7 @@
                 else
                 {
                    toastr.success(result.message);
-                   
+
                    setTimeout(function () {
                        window.location.reload();
                    }, 1000);

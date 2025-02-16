@@ -7,7 +7,8 @@
 
 <div class="input-group input-group-outline is-filled my-3">
     <label class="form-label">Son Tarih</label>
-    <input id="duedate" type="datetime-local" class="form-control" @(Model.IsReadonly ? "readonly" : string.Empty) value="@DateTime.Now" autocomplete="off" />
+    <input id="duedate" type="datetime-local" class="form-control" @(Model.IsReadonly ? "readonly" : string.Empty) value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
+           autocomplete="off" />
 </div>
 
 @if (Model.HasCompletedField)

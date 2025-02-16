@@ -4,14 +4,14 @@
     {
         protected Result(bool success, string message, IDictionary<string, IEnumerable<string>>? errors = null)
         {
-            Success = success;
+            IsSuccess = success;
             Message = message;
             Errors = errors ?? new Dictionary<string, IEnumerable<string>>();
         }
 
         protected Result(bool success, string message, IEnumerable<string>? errorMessages = null)
         {
-            Success = success;
+            IsSuccess = success;
             Message = message;
 
             if (errorMessages != null && errorMessages.Any())
@@ -35,7 +35,7 @@
             }
         }
 
-        public bool Success { get; } // İşlemin başarılı olup olmadığını belirtir
+        public bool IsSuccess { get; } // İşlemin başarılı olup olmadığını belirtir
         public string Message { get; } // İşlemle ilgili mesaj
         public IDictionary<string, IEnumerable<string>> Errors { get; } // Hataların alan adıyla birlikte listesi
 

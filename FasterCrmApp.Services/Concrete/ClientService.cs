@@ -46,7 +46,7 @@ namespace FasterCrmApp.Services.Concrete
                 var clients = _clientRepository.GetAll();
 
                 if (clients == null || !clients.Any())
-                    return Result<List<ClientModel>>.FailureResult("No clients found.", new List<string> { "The database contains no clients." });
+                    return Result<List<ClientModel>>.SuccessResult(new List<ClientModel>(), "No clients found.");
 
                 var clientModels = _mapper.Map<List<ClientModel>>(clients);
 
@@ -70,7 +70,7 @@ namespace FasterCrmApp.Services.Concrete
                 );
 
                 if (clients == null || !clients.Any())
-                    return Result<List<ClientModel>>.FailureResult("No clients found.", new List<string> { "The database contains no clients." });
+                    return Result<List<ClientModel>>.SuccessResult(new List<ClientModel>(), "No clients found.");
 
                 var clientModels = _mapper.Map<List<ClientModel>>(clients);
 
@@ -87,11 +87,11 @@ namespace FasterCrmApp.Services.Concrete
             try
             {
                 var client = _mapper.Map<Client>(createClientModel);
-                client.CreatedAt = DateTime.Now;
 
                 ValidationTool.Validate(new ClientValidator(), client);
 
                 _clientRepository.Add(client);
+
                 return Result.SuccessResult("Client successfully added.");
             }
             catch (CustomValidationException ex)
@@ -104,6 +104,7 @@ namespace FasterCrmApp.Services.Concrete
                 {
                     { "General", new List<string> { ex.Message } }
                 };
+
                 return Result.FailureResult("An error occurred while adding the client.", errors);
             }
         }
@@ -120,6 +121,7 @@ namespace FasterCrmApp.Services.Concrete
                     {
                         { "ID", new List<string> { "The client with the given ID does not exist." } }
                     };
+
                     return Result.FailureResult("Client not found.", errors);
                 }
 
@@ -142,6 +144,7 @@ namespace FasterCrmApp.Services.Concrete
                 {
                     { "General", new List<string> { ex.Message } }
                 };
+
                 return Result.FailureResult("An error occurred while updating the client.", errors);
             }
         }
@@ -158,6 +161,7 @@ namespace FasterCrmApp.Services.Concrete
                     {
                         { "ID", new List<string> { "The client with the given ID does not exist." } }
                     };
+
                     return Result.FailureResult("Client not found.", errors);
                 }
 
@@ -171,6 +175,7 @@ namespace FasterCrmApp.Services.Concrete
                 {
                     { "General", new List<string> { ex.Message } }
                 };
+
                 return Result.FailureResult("An error occurred while deleting the client.", errors);
             }
         }

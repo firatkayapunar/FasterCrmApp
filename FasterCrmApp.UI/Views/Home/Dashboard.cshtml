@@ -402,7 +402,18 @@
 </div>
 
 @section Scripts {
+
     <script>
+
+        $(document).ready(function () {
+             var errorMessage = "@TempData["ErrorMessage"]";
+             
+             console.log("ErrorMessages:",errorMessage);
+
+             if (errorMessage)
+                toastr.error(errorMessage);
+        });
+
         var ctx = document.getElementById("chart-bars").getContext("2d");
 
         new Chart(ctx, {

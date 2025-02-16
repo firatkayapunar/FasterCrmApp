@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FasterCrmApp.DataAccess.Abstract;
 using FasterCrmApp.Entities.Concrete;
+using FasterCrmApp.Entities.Enum;
 using FasterCrmApp.Models;
 using FasterCrmApp.Models.Results;
 using FasterCrmApp.Services.Abstract;
@@ -12,11 +13,13 @@ namespace FasterCrmApp.Services.Concrete
     public class IssueService : IIssueService
     {
         private readonly IIssueRepository _issueRepository;
+        private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
 
-        public IssueService(IIssueRepository issueRepository, IMapper mapper)
+        public IssueService(IIssueRepository issueRepository, INotificationService notificationService, IMapper mapper)
         {
             _issueRepository = issueRepository;
+            _notificationService = notificationService;
             _mapper = mapper;
         }
 
@@ -46,11 +49,15 @@ namespace FasterCrmApp.Services.Concrete
                 var issues = _issueRepository.GetAll();
 
                 if (issues == null || !issues.Any())
-                    return Result<List<IssueModel>>.FailureResult("No issues found.", new List<string> { "The database contains no issues." });
+                    return Result<List<IssueModel>>.SuccessResult(new List<IssueModel>(), "No issues found.");
 
                 var issueModels = _mapper.Map<List<IssueModel>>(issues);
 
-                return Result<List<IssueModel>>.SuccessResult(issueModels.OrderBy(x => x.IsCompleted).ThenByDescending(x => x.CreatedAt).ToList(), "Issues retrieved successfully.");
+                return Result<List<IssueModel>>.SuccessResult(
+                    issueModels.OrderBy(x => x.IsCompleted).ThenByDescending(x => x.CreatedAt).ToList(),
+                    "Issues retrieved successfully."
+                );
+
             }
             catch (Exception ex)
             {
@@ -62,16 +69,17 @@ namespace FasterCrmApp.Services.Concrete
         {
             try
             {
-                var existingClient = _issueRepository.GetAll(x =>
-                              x.UserID == userId
-                );
+                var existingClient = _issueRepository.GetAll(x => x.UserID == userId);
 
                 if (existingClient == null || !existingClient.Any())
-                    return Result<List<IssueModel>>.FailureResult("No issues found.", new List<string> { "The database contains no issues." });
+                    return Result<List<IssueModel>>.SuccessResult(new List<IssueModel>(), "No issues found.");
 
                 var issueModels = _mapper.Map<List<IssueModel>>(existingClient);
 
-                return Result<List<IssueModel>>.SuccessResult(issueModels.OrderByDescending(x => x.CreatedAt).ToList(), "Issues retrieved successfully.");
+                return Result<List<IssueModel>>.SuccessResult(
+                    issueModels.OrderByDescending(x => x.CreatedAt).ToList(),
+                    "Issues retrieved successfully."
+                );
             }
             catch (Exception ex)
             {
@@ -84,15 +92,20 @@ namespace FasterCrmApp.Services.Concrete
             try
             {
                 var issues = _issueRepository.GetAll(x =>
-                              x.Summary.Contains(search)
+                             x.Summary.Contains(search)
                 );
 
+                // Eğer veri yoksa hata yerine boş bir liste dönelim.
                 if (issues == null || !issues.Any())
-                    return Result<List<IssueModel>>.FailureResult("No issues found.", new List<string> { "The database contains no issues." });
+                    return Result<List<IssueModel>>.SuccessResult(new List<IssueModel>(), "No issues found.");
 
                 var issueModels = _mapper.Map<List<IssueModel>>(issues);
 
-                return Result<List<IssueModel>>.SuccessResult(issueModels.OrderByDescending(x => x.CreatedAt).ToList(), "Issues retrieved successfully.");
+                return Result<List<IssueModel>>.SuccessResult(
+                    issueModels.OrderByDescending(x => x.CreatedAt).ToList(),
+                    "Issues retrieved successfully."
+                );
+
             }
             catch (Exception ex)
             {
@@ -105,16 +118,21 @@ namespace FasterCrmApp.Services.Concrete
             try
             {
                 var issues = _issueRepository.GetAll(x =>
-                              x.UserID == userId &&
-                              x.Summary.Contains(search)
+                             x.UserID == userId 
+                             &&
+                             x.Summary.Contains(search)
                 );
 
                 if (issues == null || !issues.Any())
-                    return Result<List<IssueModel>>.FailureResult("No issues found.", new List<string> { "The database contains no issues." });
+                    return Result<List<IssueModel>>.SuccessResult(new List<IssueModel>(), "No issues found.");
 
                 var issueModels = _mapper.Map<List<IssueModel>>(issues);
 
-                return Result<List<IssueModel>>.SuccessResult(issueModels.OrderByDescending(x => x.CreatedAt).ToList(), "Issues retrieved successfully.");
+                return Result<List<IssueModel>>.SuccessResult(
+                    issueModels.OrderByDescending(x => x.CreatedAt).ToList(),
+                    "Issues retrieved successfully."
+                );
+
             }
             catch (Exception ex)
             {
@@ -127,11 +145,19 @@ namespace FasterCrmApp.Services.Concrete
             try
             {
                 var issue = _mapper.Map<Issue>(createIssueModel);
-                issue.CreatedAt = DateTime.Now;
-
                 ValidationTool.Validate(new IssueValidator(), issue);
 
                 _issueRepository.Add(issue);
+
+                // Aslında burada Unit of Work pattern kullanarak, Issue ekleme işlemi sırasında herhangi bir sorun yaşanmazken, Notification eklenirken bir hata oluştuğu durumu kontrol altına almamız ve işlemi transaction ile yönetmemiz gerekirdi. Böylece, herhangi bir aşamada hata meydana geldiğinde tüm işlemler geri alınarak (rollback) veri bütünlüğü korunmuş olur.
+
+                var notificationResult = _notificationService.Create(new CreateNotificationModel
+                {
+                    Text = "Yeni görev atandı.",
+                    NotifcationType = (int)NotificationType.IssueAdded,
+                    UserID = createIssueModel.UserID
+                });
+
                 return Result.SuccessResult("Issue successfully added.");
             }
             catch (CustomValidationException ex)
@@ -164,11 +190,33 @@ namespace FasterCrmApp.Services.Concrete
                 }
 
                 var issue = _mapper.Map(editIssueModel, existingIssue);
-                issue.CreatedAt = existingIssue.CreatedAt;
 
                 ValidationTool.Validate(new IssueValidator(), issue);
 
                 _issueRepository.Update(issue);
+
+                // Aslında burada Unit of Work pattern kullanarak, Issue güncelleme işlemi sırasında herhangi bir sorun yaşanmazken, Notification eklenirken bir hata oluştuğu durumu kontrol altına almamız ve işlemi transaction ile yönetmemiz gerekirdi. Böylece, herhangi bir aşamada hata meydana geldiğinde tüm işlemler geri alınarak (rollback) veri bütünlüğü korunmuş olur.
+
+                if (editIssueModel.IsCompleted)
+                {
+                    var result = _notificationService.Create(new CreateNotificationModel
+                    {
+                        Text = "Görev tamamlandı.",
+                        NotifcationType = (int)NotificationType.IssueCompleted,
+                        UserID = editIssueModel.UserID
+                    }
+                    );
+                }
+                else
+                {
+                    var result = _notificationService.Create(new CreateNotificationModel
+                    {
+                        Text = "Görev güncellendi.",
+                        NotifcationType = (int)NotificationType.IssueChanged,
+                        UserID = editIssueModel.UserID
+                    }
+                    );
+                }
 
                 return Result.SuccessResult("Issue successfully updated.");
             }

@@ -4,8 +4,7 @@
     {
         public string Summary { get; set; } = string.Empty;
         public DateTime? DueDate { get; set; }
-        public int UserId { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public int UserID { get; set; }
     }
 
     public class EditIssueModel
