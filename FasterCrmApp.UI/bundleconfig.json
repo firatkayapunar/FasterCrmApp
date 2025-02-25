@@ -1,0 +1,26 @@
+[
+  {
+    "outputFileName": "wwwroot/assets/js/material-dashboard.min.js",
+    "inputFiles": [
+      "wwwroot/assets/js/material-dashboard.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/assets/js/plugins/jquery/jquery.min.js",
+    "inputFiles": [
+      "wwwroot/assets/js/plugins/jquery/jquery.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/assets/js/scripts.min.js",
+    "inputFiles": [
+      "wwwroot/assets/js/scripts.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/assets/css/material-dashboard.min.css",
+    "inputFiles": [
+      "wwwroot/assets/css/material-dashboard.css"
+    ]
+  }
+]

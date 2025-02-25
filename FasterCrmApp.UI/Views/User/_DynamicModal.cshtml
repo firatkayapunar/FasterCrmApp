@@ -1,0 +1,77 @@
+﻿@model UserModalViewModel
+
+<div class="modal fade" id="@Model.ID" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title font-weight-normal" id="@Model.TitleID">@Model.Title</h6>
+                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+
+                    @if (Model.ModalName == ModalEnum.Create || Model.ModalName == ModalEnum.Details || Model.ModalName == ModalEnum.Delete || Model.ModalName == ModalEnum.Edit)
+                    {
+                        <div class="input-group input-group-outline my-3">
+                            <label class="form-label" for="name">Ad Soyad</label>
+                            <input id="name" type="text" class="form-control" @(Model.ModelInputViewModel.IsReadonly ? "readonly" : string.Empty) autocomplete="off">
+                        </div>
+                        <div class="input-group input-group-outline my-3">
+                            <label class="form-label" for="email">E-posta</label>
+                            <input id="email" type="email" class="form-control" @(Model.ModelInputViewModel.IsReadonly ? "readonly" : string.Empty) autocomplete="off">
+                        </div>
+                        <div class="form-check my-3">
+                            <input id="islocked" type="checkbox" class="form-check-input" @(Model.ModelInputViewModel.IsDisabled ? "disabled" : string.Empty)>
+                            <label class="custom-control-label" for="islocked">Pasif</label>
+                        </div>
+                        <div class="input-group input-group-outline is-filled my-3">
+                            <label class="form-label" id="userid">Rolü</label>
+                            <select id="role" class="form-control" @(Model.ModelInputViewModel.IsDisabled ? "disabled" : string.Empty)>
+                                @{
+                                    @foreach (var role in FasterCrmApp.Services.Concrete.RoleHelper.GetAllRoles())
+                                    {
+                                        <option value="@role.Key">@role.Value</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    }
+
+                    @if (Model.ModalName == ModalEnum.Create || Model.ModalName == ModalEnum.ChangeUsername || Model.ModalName == ModalEnum.Details || Model.ModalName == ModalEnum.Delete)
+                    {
+                        <div class="input-group input-group-outline my-3">
+                            <label class="form-label" for="username">Kullanıcı Adı</label>
+                            <input id="username" type="text" class="form-control" @(Model.ModelInputViewModel.IsReadonly ? "readonly" : string.Empty) autocomplete="off">
+                        </div>
+                    }
+
+                    @if (Model.ModalName == ModalEnum.Create || Model.ModalName == ModalEnum.ChangePassword)
+                    {
+                        <div class="input-group input-group-outline my-3">
+                            <label class="form-label" for="password">Şifre</label>
+                            <input id="password" type="password" class="form-control" autocomplete="off">
+                        </div>
+                        <div class="input-group input-group-outline my-3">
+                            <label class="form-label" for="repassword">Şifre (Tekrar)</label>
+                            <input id="repassword" type="password" class="form-control" autocomplete="off">
+                        </div>
+                    }
+
+                    @if (Model.ModelInputViewModel.HasID)
+                    {
+                        <input id="userid" type="hidden" value=string.Empty>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                @if (!string.IsNullOrWhiteSpace(Model.ActionButtonText))
+                {
+                    <button type="button" class="btn @Model.ActionButtonClass" onclick="@Model.OnActionClick">@Model.ActionButtonText</button>
+                }
+                <button type="button" class="btn btn-link ml-auto" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>

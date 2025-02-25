@@ -1,0 +1,30 @@
+﻿@model ClientModalInputViewModel
+
+<div class="input-group input-group-outline my-3">
+    <label class="form-label" for="name">Ad Soyad / Şirket Adı</label>
+    <input id="name" type="text" class="form-control" @(Model.IsReadonly ? "readonly" : string.Empty) autocomplete="off">
+</div>
+<div class="input-group input-group-outline my-3">
+    <label class="form-label" for="email">E-Posta</label>
+    <input id="email" type="email" class="form-control" @(Model.IsReadonly ? "readonly" : string.Empty) autocomplete="off">
+</div>
+<div class="input-group input-group-outline my-3">
+    <label class="form-label" for="phone">Telefon</label>
+    <input id="phone" type="tel" class="form-control" @(Model.IsReadonly ? "readonly" : string.Empty) autocomplete="off">
+</div>
+<div class="form-check my-3">
+    <input id="iscorporate" type="checkbox" class="form-check-input" @(Model.IsDisabled ? "disabled" : string.Empty)>
+    <label class="custom-control-label" for="iscorporate">Kurumsal</label>
+</div>
+<div class="form-check my-3">
+    <input id="islocked" type="checkbox" class="form-check-input" @(Model.IsDisabled ? "disabled" : string.Empty)>
+    <label class="custom-control-label" for="islocked">Pasif</label>
+</div>
+<div class="input-group input-group-outline my-3">
+    <label class="form-label" for="description">Açıklama</label>
+    <textarea id="description" class="form-control" col="30" row="3" @(Model.IsReadonly ? "readonly" : string.Empty) autocomplete="off"></textarea>
+</div>
+
+@if(Model.HasID){
+    <input id="clientid" type="hidden" value=string.Empty />
+}
