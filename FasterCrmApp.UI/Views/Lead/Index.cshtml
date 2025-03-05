@@ -1,0 +1,584 @@
+﻿@model Result<List<LeadModel>>;
+
+@{
+    ViewData["Title"] = "Talepler";
+    ViewData["PageName"] = "lead-index";
+    Layout = "_Layout";
+
+    var modals = new List<LeadModalViewModel>
+    {
+        new LeadModalViewModel
+        {
+            ID = "modal-create-lead",
+            Title = "Yeni Talep Oluştur",
+            TitleID = "modal-title-create",
+            ActionButtonText = "Kaydet",
+            ActionButtonClass = "bg-gradient-primary",
+            OnActionClick = "createLead()",
+            ModelInputViewModel = new LeadModalInputViewModel()
+        },
+        new LeadModalViewModel
+        {
+            ID = "modal-edit-lead",
+            Title = "Talep Güncelleme",
+            TitleID = "modal-title-edit",
+            ActionButtonText = "Güncelle",
+            ActionButtonClass = "bg-gradient-warning",
+            OnActionClick = "updateLead()",
+            ModelInputViewModel = new LeadModalInputViewModel { HasID = true , HasTypeField = true}
+        },
+        new LeadModalViewModel
+        {
+            ID = "modal-details-lead",
+            Title = "Talep Detayları",
+            TitleID = "modal-title-details",
+            ModelInputViewModel = new LeadModalInputViewModel { IsReadonly = true, IsDisabled = true, HasTypeField = true}
+        },
+        new LeadModalViewModel
+        {
+            ID = "modal-delete-lead",
+            Title = "Talep Sil (Bazı hataların geri dönüşü olmaz !)",
+            TitleID = "modal-title-delete",
+            ActionButtonText = "Sil",
+            ActionButtonClass = "bg-gradient-danger",
+            OnActionClick = "deleteLead()",
+            ModelInputViewModel = new LeadModalInputViewModel { IsReadonly = true, IsDisabled = true,HasID = true, HasTypeField = true}
+        }
+    };
+}
+
+@section Styles {
+    <style>
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+                    <h6 class="text-white text-capitalize ps-3">Talepler</h6>
+                </div>
+            </div>
+            <div class="card-body px-0 pb-2">
+                <div class="px-4 d-flex justify-content-between">
+                    <div>
+                        <button class="btn btn-icon btn-3 btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-create-lead">
+                            <i class="material-symbols-rounded">add</i>
+                            <span>Yeni Talep</span>
+                        </button>
+                    </div>
+                    <div>
+                        <div class="input-group input-group-sm input-group-outline">
+                            <label class="form-label">Arama</label>
+                            <input id="search" name="search" type="text" class="form-control from-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center justify-content-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Müşteri</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Özet</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Durumu</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Atanan</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Kayıt Tarihi</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Güncelleme Tarihi</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Data == null || Model.Data.Count == 0)
+                            {
+                                <tr>
+                                    <td class="text-center" colspan="6">
+                                        <span class="mb-0 ps-2 text-sm">Herhangi bir talep bulunamadı.</span>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var lead in Model.Data)
+                                {
+                                    var badgeColor = "secondary";
+                                    var badgeText = string.Empty;
+
+                                    switch (lead.LeadType)
+                                    {
+                                        case (int)LeadType.Waiting:
+                                            badgeColor = "primary";
+                                            badgeText = "Bekliyor";
+                                            break;
+
+                                        case (int)LeadType.Offered:
+                                            badgeColor = "info";
+                                            badgeText = "Tekliflendi";
+                                            break;
+
+                                        case (int)LeadType.ToCall:
+                                            badgeColor = "warning";
+                                            badgeText = "Aranacak";
+                                            break;
+
+                                        case (int)LeadType.OnSale:
+                                            badgeColor = "secondary";
+                                            badgeText = "Satışta";
+                                            break;
+
+                                        case (int)LeadType.Completed:
+                                            badgeColor = "success";
+                                            badgeText = "Tamamlandı";
+                                            break;
+
+                                        default:
+                                            badgeColor = "secondary";
+                                            badgeText = "----";
+                                            break;
+                                    }
+
+                                    <tr>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@lead.ClientName</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@lead.Summary</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-sm bg-gradient-@badgeColor">@badgeText</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@lead.UserName</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@lead.CreatedAt</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@lead.ModifiedAt</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-sm me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-edit-lead"
+                                               onclick="setLeadModal(@lead.ID, 'edit')">
+                                                Düzenle
+                                            </a>
+
+                                            <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-sm me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-details-lead"
+                                               onclick="setLeadModal(@lead.ID, 'details')">
+                                                Detay
+                                            </a>
+
+                                            <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-sm me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-delete-lead"
+                                               onclick="setLeadModal(@lead.ID, 'delete')">
+                                                Sil
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@foreach (var modal in modals)
+{
+    <partial name="_DynamicModal" model=modal></partial>
+}
+
+<div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Yükleniyor...</span>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const modalElements =
+        {
+            create: "#modal-create-lead .modal-body",
+            edit: "#modal-edit-lead .modal-body",
+            delete: "#modal-delete-lead .modal-body",
+            details: "#modal-details-lead .modal-body"
+        };
+
+        function getLeadData(modalType)
+        {
+            const modalBody = $(modalElements[modalType]);
+
+            const data = {
+                summary: modalBody.find("#summary").val(),
+                description: modalBody.find("#description").val(),
+                userid: modalBody.find("#userid").val(),
+                price: modalBody.find("#price").val(),
+                clientid: modalBody.find("#clientid").val(),
+                leadType: modalBody.find("#leadType").val()
+            };
+
+            if (modalType !== "create" || modalType !== "details")
+                data.id = modalBody.find("#leadid").val();
+
+            return data;
+        }
+
+        function createLead()
+        {
+            const modalBody = $(modalElements.create);
+            const data = getLeadData("create");
+
+            $.ajax({
+                method: "post",
+                url: "/Lead/Create",
+                data,
+                beforeSend: function (){
+                    modalBody.find(".is-invalid").removeClass("is-invalid");
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function (result) {
+                if (!result.isSuccess)
+                {
+                   for (var key in result.errors)
+                   {
+                    const field = modalBody.find('#' + key.toLowerCase());
+                    field.parent().addClass("is-invalid");
+
+                    result.errors[key].forEach(function (errorMessage)
+                    {
+                        toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                   toastr.success(result.message);
+
+                   setTimeout(function () {
+                       window.location.reload();
+                   }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function updateLead()
+        {
+            const modalBody = $(modalElements.edit);
+            const data = getLeadData("edit");
+
+            $.ajax({
+                method: "post",
+                url: "/Lead/Update",
+                data,
+                beforeSend: function (){
+                    modalBody.find(".is-invalid").removeClass("is-invalid");
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function(result){
+                if (!result.isSuccess)
+                {
+                   for (var key in result.errors)
+                   {
+                    const field = modalBody.find('#' + key.toLowerCase());
+                    field.parent().addClass("is-invalid");
+
+                    result.errors[key].forEach(function (errorMessage) {
+                        toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                   toastr.success(result.message);
+
+                   setTimeout(function () {
+                       window.location.reload();
+                   }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function deleteLead()
+        {
+            const data = getLeadData("delete");
+
+            $.ajax({
+                method: "post",
+                url : `/Lead/Delete/${data.id}`,
+                beforeSend: function (){
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function(result){
+                if (!result.isSuccess)
+                {
+                   for(var key in result.errors)
+                   {
+                    result.errors[key].forEach(function (errorMessage) {
+                        toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                   toastr.success(result.message);
+
+                   setTimeout(function () {
+                       window.location.reload();
+                   }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function loadUserListSelect(modalType, callback)
+        {
+            $.ajax({
+                method: "get",
+                url: "/Lead/GetUserList"
+            }).done(function (result) {
+                if (result.isSuccess)
+                {
+                    modalBody = $(modalElements[modalType]);
+
+                    const inp_userid = modalBody.find("#userid");
+
+                    inp_userid.empty();
+
+                    if (Array.isArray(result.data))
+                    {
+                        for (var i = 0; i < result.data.length; i++)
+                        {
+                         const user = result.data[i];
+                         inp_userid.append(`<option value="${user.id}">${user.name}</option>`);
+                        }
+                    }
+                    else
+                    {
+                         const user = result.data;
+                         inp_userid.append(`<option value="${user.id}">${user.name}</option>`);
+                    }
+                }
+            }).always(function () {
+                if (typeof callback === "function" && callback !== null)
+                    callback();
+            });
+        }
+
+        function loadClientListSelect(modalType, callback)
+        {
+            $.ajax({
+                method: "get",
+                url: "/Lead/GetClientList"
+            }).done(function (result) {
+                if (result.isSuccess)
+                {
+                    modalBody = $(modalElements[modalType]);
+                    const inp_clientid = modalBody.find("#clientid");
+
+                    inp_clientid.empty();
+
+                    for (var i = 0; i < result.data.length; i++)
+                    {
+                     const client = result.data[i];
+                     inp_clientid.append(`<option value="${client.id}">${client.name}</option>`);
+                    }
+                }
+            }).always(function () {
+                if (typeof callback === "function" && callback !== null)
+                    callback();
+            });
+        }
+
+        function setLeadModal(id, modalType)
+        {
+            loadUserListSelect(modalType, function () {
+                loadClientListSelect(modalType, function () {
+                    $.ajax({
+                        method: "get",
+                        url: `/Lead/Details/${id}`
+                    }).done(function (result) {
+                         if (result.isSuccess)
+                        {
+                            modalBody = $(modalElements[modalType]);
+
+                            const inp_summary = modalBody.find("#summary");
+                            const inp_description = modalBody.find("#description");
+                            const inp_price = modalBody.find("#price");
+                            const inp_userid = modalBody.find("#userid");
+                            const inp_clientid = modalBody.find("#clientid");
+                            const inp_leadType = modalBody.find("#leadType");
+
+                            if (modalType !== "create" && modalType !== "details")
+                            {
+                              const inp_leadId = modalBody.find("#leadid");
+                              inp_leadId.val(result.data.id);
+                            }
+
+                            inp_summary.val(result.data.summary);
+                            inp_description.val(result.data.description);
+                            inp_price.val(result.data.price);
+                            inp_userid.val(result.data.userID);
+                            inp_clientid.val(result.data.clientID);
+                            inp_leadType.val(result.data.leadType);
+
+                            modalBody.find(".form-control").each(function () {
+                           if ($(this).val().trim() !== "")
+                               $(this).parent().addClass("is-filled");
+                       });
+                   }
+                    }).fail(function () {
+                        toastr.error("A connection to the server could not be established.");
+                    });
+                });
+            });
+        }
+
+        function searchLeads(search)
+        {
+            const url = '/Lead/Search?search=' + encodeURIComponent(search);
+
+            $.ajax({
+                method: "get",
+                url: url,
+                beforeSend: function () {
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function (result){
+                if (result.isSuccess)
+                    updateTable(result.data);
+                else
+                    toastr.error(result.message);
+            }).fail(function (){
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function updateTable(leads)
+        {
+            const tbody = $("table tbody");
+
+            tbody.empty();
+
+            if (leads && leads.length > 0)
+            {
+                leads.forEach((lead) => {
+                const createdAt = lead.createdAt ? new Date(lead.createdAt).toLocaleString('tr-TR') : "";
+                const modifiedAt = lead.modifiedAt ? new Date(lead.modifiedAt).toLocaleString('tr-TR') : "";
+
+                const row = `
+                    <tr>
+                        <td class="text-center">
+                            <span class="text-sm font-weight-bold mb-0">${lead.customerName}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="text-sm font-weight-bold mb-0">${lead.summary}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-sm ${lead.completed ? "bg-gradient-success" : "bg-gradient-secondary"}">
+                                ${lead.completed ? "Tamamlandı" : "Tamamlanmadı"}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="text-sm font-weight-bold mb-0">${lead.userName}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="text-sm font-weight-bold mb-0">${createdAt}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="text-sm font-weight-bold mb-0">${modifiedAt}</span>
+                        </td>
+                        <td class="text-center">
+                            <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-sm me-2"
+                               data-bs-toggle="modal"
+                               data-bs-target="#modal-edit-lead"
+                               onclick="setLeadModal(${lead.id}, 'edit')">
+                                Düzenle
+                            </a>
+
+                            <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-sm me-2"
+                               data-bs-toggle="modal"
+                               data-bs-target="#modal-details-lead"
+                               onclick="setLeadModal(${lead.id}, 'details')">
+                                Detay
+                            </a>
+
+                            <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-sm me-2"
+                               data-bs-toggle="modal"
+                               data-bs-target="#modal-delete-lead"
+                               onclick="setLeadModal(${lead.id}, 'delete')">
+                                Sil
+                            </a>
+                        </td>
+                    </tr>
+                `;
+
+                tbody.append(row);
+
+                });
+            }
+            else
+            {
+                tbody.append(`
+                    <tr>
+                        <td class="text-center" colspan="6">
+                            <span class="mb-0 ps-2 text-sm">Arama kriterlerine uygun talep bulunamadı.</span>
+                        </td>
+                    </tr>
+                `);
+            }
+        }
+
+        let searchTimeout;
+
+        $(function ()
+        {
+            $("#search").on("input", function () {
+                const search = $(this).val();
+
+                clearTimeout(searchTimeout);
+
+                searchTimeout = setTimeout(function () {
+                    searchLeads(search);
+                }, 1000);
+            });
+
+            loadUserListSelect("create");
+            loadClientListSelect("create");
+        });
+    </script>
+}

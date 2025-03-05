@@ -1,0 +1,111 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutEmpty.cshtml";
+    ViewData["Title"] = "Giriş";
+    ViewData["PageName"] = "account-login";
+}
+
+@section Styles {
+    <style>
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-lg-4 col-md-8 col-12 mx-auto">
+        <div class="card z-index-0 fadeIn3 fadeInBottom">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="bg-gradient-dark shadow-dark border-radius-lg py-3 pe-1">
+                    <h4 class="text-white font-weight-bolder text-center mt-2 mb-0">Faster Crm Giriş</h4>
+                    <div class="row mt-3"></div>
+                </div>
+            </div>
+            <div class="card-body">
+                <form role="form" class="text-start">
+                    <div class="input-group input-group-outline my-3">
+                        <label class="form-label">Kullanıcı Adı</label>
+                        <input id="username" type="text" class="form-control" autocomplete="off">
+                    </div>
+                    <div class="input-group input-group-outline mb-3">
+                        <label class="form-label">Şifre</label>
+                        <input id="password" type="password" class="form-control">
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn bg-gradient-dark w-100 my-4 mb-2" onclick="login()">Giriş Yap</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Yükleniyor...</span>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+
+        function login()
+        {
+           let fusername = $("#username").val();
+           let fpassword= $("#password").val();
+
+            var data = {
+                "username": fusername,
+                "password": fpassword,
+            };
+
+            $.ajax({
+                method: "post",
+                url: "/Account/Login",
+                data: data,
+                beforeSend: function (){
+                    $(".is-invalid").removeClass("is-invalid");
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function (result) {
+
+                if (!result.isSuccess) {
+                   for (var key in result.errors)
+                   {
+                     var field = $('#' + key.toLowerCase());
+                     field.parent().addClass("is-invalid");
+
+                     result.errors[key].forEach(function (errorMessage)
+                     {
+                         toastr.error(errorMessage);
+                     });
+                   }
+                }
+                else
+                {
+                  toastr.success(result.message);
+
+                  setTimeout(function () {
+                      window.location = "/Client/Index";
+                  }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+    </script>
+}

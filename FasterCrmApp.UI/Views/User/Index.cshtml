@@ -1,0 +1,637 @@
+﻿@model Result<List<UserModel>>;
+
+@{
+    ViewData["Title"] = "Kullanıcılar";
+    ViewData["PageName"] = "user-index";
+    Layout = "_Layout";
+
+    var modals = new List<UserModalViewModel>
+    {
+        new UserModalViewModel
+        {
+            ID = "modal-create-user",
+            ModalName = ModalEnum.Create,
+            Title = "Yeni Kullanııcı Oluştur",
+            TitleID = "modal-title-create",
+            ActionButtonText = "Kaydet",
+            ActionButtonClass = "bg-gradient-primary",
+            OnActionClick = "createUser()",
+            ModelInputViewModel = new ModalInputViewModel()
+        },
+        new UserModalViewModel
+        {
+            ID = "modal-edit-user",
+            ModalName = ModalEnum.Edit,
+            Title = "Kullanııcı Güncelleme",
+            TitleID = "modal-title-edit",
+            ActionButtonText = "Güncelle",
+            ActionButtonClass = "bg-gradient-warning",
+            OnActionClick = "updateUser()",
+            ModelInputViewModel = new ModalInputViewModel { HasID = true }
+        },
+        new UserModalViewModel
+        {
+            ID = "modal-details-user",
+            ModalName = ModalEnum.Details,
+            Title = "Kullanıcı Detayları",
+            TitleID = "modal-title-details",
+            ModelInputViewModel = new ModalInputViewModel { IsReadonly = true, IsDisabled = true }
+        },
+        new UserModalViewModel
+        {
+            ID = "modal-delete-user",
+            ModalName = ModalEnum.Delete,
+            Title = "Kullanıcı Sil (Bazı hataların geri dönüşü olmaz !)",
+            TitleID = "modal-title-delete",
+            ActionButtonText = "Sil",
+            ActionButtonClass = "bg-gradient-danger",
+            OnActionClick = "deleteUser()",
+            ModelInputViewModel = new ModalInputViewModel { IsReadonly = true, IsDisabled = true,HasID = true  }
+        },
+          new UserModalViewModel
+        {
+            ID = "modal-change-username",
+            ModalName = ModalEnum.ChangeUsername,
+            Title = "Kullanıcı Adı Güncelle",
+            TitleID = "modal-title-changeUsername",
+            ActionButtonText = "Kullanıcı Adı Güncelle",
+            ActionButtonClass = "bg-gradient-warning",
+            OnActionClick = "changeUsername()",
+            ModelInputViewModel = new ModalInputViewModel {HasID = true  }
+        },
+          new UserModalViewModel
+        {
+            ID = "modal-change-password",
+            ModalName = ModalEnum.ChangePassword,
+            Title = "Kullanıcı Şifre Güncelle",
+            TitleID = "modal-title-changePassword",
+            ActionButtonText = "Kullanıcı Şifre Güncelle",
+            ActionButtonClass = "bg-gradient-warning",
+            OnActionClick = "changePassword()",
+            ModelInputViewModel = new ModalInputViewModel {HasID = true  }
+        }
+    };
+}
+
+@section Styles {
+    <style>
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+                    <h6 class="text-white text-capitalize ps-3">Kullanıcılar</h6>
+                </div>
+            </div>
+            <div class="card-body px-0 pb-2">
+                <div class="px-4 d-flex justify-content-between">
+                    <div>
+                        <button class="btn btn-icon btn-3 btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-create-user">
+                            <i class="material-symbols-rounded">add</i>
+                            <span>Yeni Kullanıcı</span>
+                        </button>
+                    </div>
+                    <div>
+                        <div class="input-group input-group-sm input-group-outline">
+                            <label class="form-label">Arama</label>
+                            <input id="search" name="search" type="text" class="form-control from-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center justify-content-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Ad Soyad</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Kullanıcı Adı</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">E-Posta</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Rolü</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Durumu</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Kayıt Tarihi</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Data == null || Model.Data.Count == 0)
+                            {
+                                <tr>
+                                    <td class="text-center" colspan="6">
+                                        <span class="mb-0 ps-2 text-sm">Herhangi bir kullanıcı bulunamadı.</span>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var user in Model.Data)
+                                {
+                                    <tr>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@user.Name</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@user.Name</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0"><a href="@user.Email" target="_blank">@user.Email</a></span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@user.RoleName</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-sm @(user.IsLocked ? " bg-gradient-secondary" : "bg-gradient-success")">@(user.IsLocked ? "Pasif" : "Aktif")</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@user.CreatedAt</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-edit-user"
+                                               onclick="setUserModal(@user.ID, 'edit')">
+                                                Düzenle
+                                            </a>
+
+                                            <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-details-user"
+                                               onclick="setUserModal(@user.ID, 'details')">
+                                                Detay
+                                            </a>
+
+                                            <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-delete-user"
+                                               onclick="setUserModal(@user.ID, 'delete')">
+                                                Sil
+                                            </a>
+
+                                            <a href="javascript:;" class="btn btn-warning btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-change-username"
+                                               onclick="setUserModal(@user.ID, 'changeUsername')">
+                                                Kullanıcı Adı Değiştir
+                                            </a>
+
+                                            <a href="javascript:;" class="btn btn-dark btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-change-password"
+                                               onclick="setUserModal(@user.ID, 'changePassword')">
+                                                Şifre Değiştir
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@foreach (var modal in modals)
+{
+    <partial name="_DynamicModal" model=modal></partial>
+}
+
+<div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Yükleniyor...</span>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const modalElements =
+        {
+            create: "#modal-create-user .modal-body",
+            edit: "#modal-edit-user .modal-body",
+            delete: "#modal-delete-user .modal-body",
+            details: "#modal-details-user .modal-body",
+            changeUsername: "#modal-change-username .modal-body",
+            changePassword: "#modal-change-password .modal-body"
+        };
+
+        function getUserData(modalType)
+        {
+            const modalBody = $(modalElements[modalType]);
+
+            const data = {
+                name: modalBody.find("#name").val(),
+                email: modalBody.find("#email").val(),
+                isLocked: modalBody.find("#islocked").is(":checked"),
+                role: modalBody.find("#role").val()
+            };
+
+            if (modalType === "create" || modalType === "changeUsername" || modalType === "details" || modalType === "delete")
+                data.username = modalBody.find("#username").val();
+
+            if (modalType !== "create" || modalType !== "details")
+               data.id = modalBody.find("#userid").val();
+
+            if (modalType === "create" || modalType === "changePassword")
+            {
+                data.password = modalBody.find("#password").val();
+                data.repassword = modalBody.find("#repassword").val();
+            }
+
+            return data;
+        }
+
+        function createUser()
+        {
+            const modalBody = $(modalElements.create);
+            const data = getUserData("create");
+
+            $.ajax({
+                method: "post",
+                url: "/User/Create",
+                data,
+                beforeSend: function (){
+                    modalBody.find(".is-invalid").removeClass("is-invalid");
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function (result) {
+                if (!result.isSuccess)
+                {
+                   for (var key in result.errors)
+                   {
+                    const field = modalBody.find('#' + key.toLowerCase());
+                    field.parent().addClass("is-invalid");
+
+                    result.errors[key].forEach(function (errorMessage){
+                        toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                   toastr.success(result.message);
+
+                   setTimeout(function () {
+                       window.location.reload();
+                   }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function updateUser()
+        {
+            const modalBody = $(modalElements.edit);
+            const data = getUserData("edit");
+
+            $.ajax({
+                method: "post",
+                url: "/User/Update",
+                data,
+                beforeSend: function (){
+                    modalBody.find(".is-invalid").removeClass("is-invalid");
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function(result){
+                if (!result.isSuccess)
+                {
+                   for (var key in result.errors)
+                   {
+                    const field = modalBody.find('#' + key.toLowerCase());
+                    field.parent().addClass("is-invalid");
+
+                    result.errors[key].forEach(function (errorMessage) {
+                        toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                   toastr.success(result.message);
+
+                   setTimeout(function () {
+                       window.location.reload();
+                   }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function deleteUser()
+        {
+            const data = getUserData("delete");
+
+            $.ajax({
+                method: "post",
+                url : `/User/Delete/${data.id}`,
+                beforeSend: function (){
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function(result){
+                if (!result.isSuccess)
+                {
+                   for(var key in result.errors)
+                   {
+                    result.errors[key].forEach(function (errorMessage) {
+                        toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                   toastr.success(result.message);
+
+                   setTimeout(function () {
+                       window.location.reload();
+                   }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function setUserModal(id, modalType)
+        {
+           $.ajax({
+               method : "get",
+               url : `/User/Details/${id}`
+           }).done(function(result){
+               const modalBody = $(modalElements[modalType]);
+
+               const inp_name = modalBody.find("#name");
+               const inp_email = modalBody.find("#email");
+               const inp_islocked = modalBody.find("#islocked");
+               const inp_role = modalBody.find("#role");
+
+               if (modalType === "create" || modalType === "changeUsername" || modalType === "details" || modalType === "delete")
+               {
+                 const inp_username = modalBody.find("#username");
+                 inp_username.val(result.data.username);
+               }
+
+               if (modalType === "create" || modalType === "changePassword")
+               {
+                 const inp_password = modalBody.find("#password");
+                 inp_password.val(result.data.password);
+
+                 const inp_repassword = modalBody.find("#repassword");
+                 inp_repassword.val(result.data.repassword);
+               }
+
+               if (modalType !== "create" || modalType !== "details")
+               {
+                 const inp_userId = modalBody.find("#userid");
+                 inp_userId.val(result.data.id);
+               }
+
+               inp_name.val(result.data.name);
+               inp_email.val(result.data.email);
+               inp_role.val(result.data.role);
+               inp_islocked.prop('checked',result.data.isLocked);
+
+               modalBody.find(".form-control").each(function () {
+                  if ($(this).val().trim() !== "")
+                      $(this).parent().addClass("is-filled");
+               });
+           }).fail(function () {
+               toastr.error("A connection to the server could not be established.");
+           });
+        }
+
+        function searchUsers(search)
+        {
+            const url = '/User/Search?search=' + encodeURIComponent(search);
+
+            $.ajax({
+                method: "get",
+                url: url,
+                beforeSend: function () {
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function (result){
+                if (result.isSuccess)
+                    updateTable(result.data);
+                else
+                    toastr.error(result.message);
+            }).fail(function (){
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function updateTable(users)
+        {
+            const tbody = $("table tbody");
+
+            tbody.empty();
+
+            if (users && users.length > 0)
+            {
+                users.forEach(user => {
+                    const createdAt = user.createdAt ? new Date(user.createdAt).toLocaleString('tr-TR') : "Bilinmiyor";
+
+                    const row = `
+                        <tr>
+                            <td class="text-center">
+                                <span class="text-sm font-weight-bold mb-0">${user.name}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="text-sm font-weight-bold mb-0">${user.username}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="text-sm font-weight-bold mb-0">
+                                    <a href="mailto:${user.email}" target="_blank">${user.email}</a>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="text-sm font-weight-bold mb-0">${user.roleName}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-sm ${user.isLocked ? "bg-gradient-secondary" : "bg-gradient-success"}">
+                                    ${user.isLocked ? "Pasif" : "Aktif"}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="text-sm font-weight-bold mb-0">${createdAt}</span>
+                            </td>
+                            <td class="text-center">
+                                <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-edit-user"
+                                   onclick="setUserModal(${user.id}, 'edit')">
+                                    Düzenle
+                                </a>
+
+                                <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-details-user"
+                                   onclick="setUserModal(${user.id}, 'details')">
+                                    Detay
+                                </a>
+
+                                <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-delete-user"
+                                   onclick="setUserModal(${user.id}, 'delete')">
+                                    Sil
+                                </a>
+
+                                <a href="javascript:;" class="btn btn-warning btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-change-username"
+                                   onclick="setUserModal(${user.id}, 'changeUsername')">
+                                    Kullanıcı Adı Değiştir
+                                </a>
+
+                                <a href="javascript:;" class="btn btn-dark btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-change-password"
+                                   onclick="setUserModal(${user.id}, 'changePassword')">
+                                    Şifre Değiştir
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+
+                    tbody.append(row);
+                });
+            }
+            else
+            {
+                tbody.append(`
+                    <tr>
+                        <td class="text-center" colspan="7">
+                            <span class="text-sm font-weight-bold mb-0">Arama kriterlerine uygun kullanıcı bulunamadı.</span>
+                        </td>
+                    </tr>
+                `);
+            }
+        }
+
+        let searchTimeout;
+
+        $(function ()
+        {
+           $("#search").on("input", function () {
+               const search = $(this).val();
+
+               clearTimeout(searchTimeout);
+
+               searchTimeout = setTimeout(function () {
+                   searchUsers(search);
+               }, 1000);
+           });
+        });
+
+        function changeUsername()
+        {
+            const modalBody = $(modalElements.edit);
+            const data = getUserData("changeUsername");
+
+            $.ajax({
+                method: "post",
+                url: `/User/ChangeUsername/${data.id}`,
+                data,
+                beforeSend: function (){
+                    modalBody.find(".is-invalid").removeClass("is-invalid");
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function(result){
+                if (!result.isSuccess)
+                {
+                   for (var key in result.errors)
+                   {
+                     const field = modalBody.find('#' + key.toLowerCase());
+                     field.parent().addClass("is-invalid");
+
+                     result.errors[key].forEach(function (errorMessage)
+                     {
+                         toastr.error(errorMessage);
+                     });
+                   }
+                }
+                else
+                {
+                   toastr.success(result.message);
+
+                   setTimeout(function () {
+                       window.location.reload();
+                   }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function changePassword ()
+        {
+            const modalBody = $(modalElements.edit);
+            const data = getUserData("changePassword");
+
+            $.ajax({
+                method: "post",
+                url: `/User/ChangePassword/${data.id}`,
+                data,
+                beforeSend: function (){
+                    modalBody.find(".is-invalid").removeClass("is-invalid");
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function(result){
+                if (!result.isSuccess)
+                 {
+                    for (var key in result.errors)
+                    {
+                     const field = modalBody.find('#' + key.toLowerCase());
+                     field.parent().addClass("is-invalid");
+
+                     result.errors[key].forEach(function (errorMessage) {
+                         toastr.error(errorMessage);
+                     });
+                    }
+                }
+                else
+                {
+                   toastr.success(result.message);
+
+                   setTimeout(function () {
+                       window.location.reload();
+                   }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+    </script>
+}

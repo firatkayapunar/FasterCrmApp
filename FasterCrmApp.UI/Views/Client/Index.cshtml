@@ -1,0 +1,558 @@
+﻿@model Result<List<ClientModel>>;
+
+@{
+    ViewData["Title"] = "Müşteriler";
+    ViewData["PageName"] = "client-index";
+    Layout = "_Layout";
+
+    var modals = new List<ClientModalViewModel>
+    {
+        new ClientModalViewModel
+        {
+            ID = "modal-create-client",
+            Title = "Yeni Müşteri Oluştur",
+            TitleID = "modal-title-create",
+            ActionButtonText = "Kaydet",
+            ActionButtonClass = "bg-gradient-primary",
+            OnActionClick = "createClient()",
+            ModelInputViewModel = new ClientModalInputViewModel()
+        },
+        new ClientModalViewModel
+        {
+            ID = "modal-edit-client",
+            Title = "Müşteri Güncelleme",
+            TitleID = "modal-title-edit",
+            ActionButtonText = "Güncelle",
+            ActionButtonClass = "bg-gradient-warning",
+            OnActionClick = "updateClient()",
+            ModelInputViewModel = new ClientModalInputViewModel { HasID = true }
+        },
+        new ClientModalViewModel
+        {
+            ID = "modal-details-client",
+            Title = "Müşteri Detayları",
+            TitleID = "modal-title-details",
+            ModelInputViewModel = new ClientModalInputViewModel { IsReadonly = true, IsDisabled = true }
+        },
+        new ClientModalViewModel
+        {
+            ID = "modal-delete-client",
+            Title = "Müşteri Sil (Bazı hataların geri dönüşü olmaz !)",
+            TitleID = "modal-title-delete",
+            ActionButtonText = "Sil",
+            ActionButtonClass = "bg-gradient-danger",
+            OnActionClick = "deleteClient()",
+            ModelInputViewModel = new ClientModalInputViewModel { IsReadonly = true, IsDisabled = true,HasID = true  }
+        }
+    };
+}
+
+@section Styles {
+    <style>
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+                    <h6 class="text-white text-capitalize ps-3">Müşteriler</h6>
+                </div>
+            </div>
+            <div class="card-body px-0 pb-2">
+                <div class="px-4 d-flex justify-content-between">
+                    <div>
+                        <button class="btn btn-icon btn-3 btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-create-client">
+                            <i class="material-symbols-rounded">add</i>
+                            <span>Yeni Müşteri</span>
+                        </button>
+                    </div>
+                    <div>
+                        <div class="input-group input-group-sm input-group-outline">
+                            <label class="form-label">Arama</label>
+                            <input id="search" name="search" type="text" class="form-control from-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center justify-content-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Ad Soyad / Şirket Adı</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">E-Posta</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Bireysel / Kurumsal</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Durumu</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Kayıt Tarihi</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Data == null || Model.Data.Count == 0)
+                            {
+                                <tr>
+                                    <td class="text-center" colspan="6">
+                                        <span class="mb-0 ps-2 text-sm">Herhangi bir müşteri bulunamadı.</span>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var client in Model.Data)
+                                {
+                                    <tr>
+                                        <td class="text-center">
+                                            <span class="text-xs font-weight-bold mb-0">@client.Name</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-xs font-weight-bold mb-0"><a href="@client.Email" target="_blank">@client.Email</a></span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-xs font-weight-bold mb-0">@(client.IsCorporate ? "Kurumsal" : "Bireysel")</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-sm @(client.IsLocked ? " bg-gradient-secondary" : "bg-gradient-success")">@(client.IsLocked ? "Pasif" : "Aktif")</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@client.CreatedAt</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-edit-client"
+                                               onclick="setClientModal(@client.ID, 'edit')">
+                                                Düzenle
+                                            </a>
+
+                                            <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-details-client"
+                                               onclick="setClientModal(@client.ID, 'details')">
+                                                Detay
+                                            </a>
+
+                                            <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-xs me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-delete-client"
+                                               onclick="setClientModal(@client.ID, 'delete')">
+                                                Sil
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@foreach (var modal in modals)
+{
+    <partial name="_DynamicModal" model=modal></partial>
+}
+
+<div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Yükleniyor...</span>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // modalElements bir JavaScript nesnesidir ve modal türlerini (örneğin, create, edit, delete, details) modalın CSS seçicileriyle eşleştirir.
+        const modalElements =
+        {
+            create: "#modal-create-client .modal-body",
+            edit: "#modal-edit-client .modal-body",
+            delete: "#modal-delete-client .modal-body",
+            details: "#modal-details-client .modal-body"
+        };
+
+        // Fonksiyona modalType adlı bir parametre veriyoruz. Bu, hangi modal ile çalışılacağını belirler (örneğin: create, edit, delete, veya details).
+        function getClientData(modalType)
+        {
+            const modalBody = $(modalElements[modalType]);
+
+            // .is(':checked'):
+            // Seçilen checkbox öğesinin işaretli olup olmadığını kontrol eder.
+            // Eğer checkbox işaretli ise true, değilse false döner.
+
+            const data = {
+                name: modalBody.find("#name").val(),
+                email: modalBody.find("#email").val(),
+                phone: modalBody.find("#phone").val(),
+                description: modalBody.find("#description").val(),
+                isCorporate: modalBody.find("#iscorporate").is(":checked"),
+                isLocked: modalBody.find("#islocked").is(":checked")
+            };
+
+            if (modalType !== "create" || modalType !== "details")
+                data.id = modalBody.find("#clientid").val();
+
+            return data;
+        }
+
+        function createClient()
+        {
+            const modalBody = $(modalElements.create);
+            const data = getClientData("create");
+
+            $.ajax({
+                method: "post",
+                url: "/Client/Create",
+                data,
+                beforeSend: function (){
+                    modalBody.find(".is-invalid").removeClass("is-invalid");
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function (result) {
+                if (!result.isSuccess)
+                {
+                   for (var key in result.errors)
+                   {
+                    const field = modalBody.find('#' + key.toLowerCase());
+                    field.parent().addClass("is-invalid");
+
+                    // C# nesnesi şu şekilde tanımlanmış olsun:
+
+                    // var errors = new Dictionary<string, List<string>>
+                    // {
+                    //     { "name", new List<string> { "Ad boş bırakılamaz.", "Ad en az 3 karakter olmalıdır." } },
+                    //     { "email", new List<string> { "Geçersiz bir e-posta adresi." } }
+                    // };
+
+                    // Bu nesne şu şekilde JSON'a çevrilir:
+
+                    // return new JsonResult(new { errors = errors });
+
+                    // Bir backend API örneğin şu şekilde bir JSON nesnesi döner:
+
+                    // {
+                    //     "success": false,
+                    //     "errors": {
+                    //         "name": ["Ad gerekli.", "Ad en az 3 karakter olmalıdır."],
+                    //         "email": ["Geçerli bir e-posta adresi giriniz."]
+                    //     }
+                    // }
+
+                    // Bu nesne JavaScript'te şu şekilde işlenir:
+
+                    // result.errors["name"]:
+                    // errors nesnesi içinde name anahtarına (key) karşılık gelen değeri döndürür.
+                    // Değer bir array'dir: ["Ad gerekli.", "Ad en az 3 karakter olmalıdır."].
+
+                    result.errors[key].forEach(function (errorMessage)
+                    {
+                        toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                  toastr.success(result.message);
+
+                  setTimeout(function () {
+                      window.location.reload();
+                  }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function updateClient()
+        {
+            const modalBody = $(modalElements.edit);
+            const data = getClientData("edit");
+
+            $.ajax({
+                method: "post",
+                url: "/Client/Update",
+                data,
+                beforeSend: function (){
+                    modalBody.find(".is-invalid").removeClass("is-invalid");
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function(result){
+                if (!result.isSuccess)
+                {
+                   for (var key in result.errors)
+                   {
+                    const field = modalBody.find('#' + key.toLowerCase());
+                    field.parent().addClass("is-invalid");
+
+                    result.errors[key].forEach(function (errorMessage) {
+                         toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                  toastr.success(result.message);
+
+                  setTimeout(function () {
+                      window.location.reload();
+                  }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function deleteClient()
+        {
+            const data = getClientData("delete");
+
+            $.ajax({
+                method: "post",
+                url : `/Client/Delete/${data.id}`,
+                beforeSend: function (){
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function(result){
+                if (!result.isSuccess)
+                {
+                   for(var key in result.errors)
+                   {
+                    result.errors[key].forEach(function (errorMessage) {
+                        toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                  toastr.success(result.message);
+
+                  setTimeout(function () {
+                      window.location.reload();
+                  }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function setClientModal(id, modalType)
+        {
+            $.ajax({
+                method : "get",
+                url : `/Client/Details/${id}`
+            }).done(function(result){
+
+                  const modalBody = $(modalElements[modalType]);
+
+                  const inp_name = modalBody.find("#name");
+                  const inp_email = modalBody.find("#email");
+                  const inp_phone = modalBody.find("#phone");
+                  const inp_description = modalBody.find("#description");
+                  const inp_iscorporate = modalBody.find("#iscorporate");
+                  const inp_islocked = modalBody.find("#islocked");
+
+                  if (modalType !== "create" || modalType !== "details")
+                  {
+                    const inp_clientId = modalBody.find("#clientid");
+                    inp_clientId.val(result.data.id);
+                  }
+
+                  inp_name.val(result.data.name);
+                  inp_email.val(result.data.email);
+                  inp_phone.val(result.data.phone);
+                  inp_description.val(result.data.description);
+
+                  // 1. Attribute (Öznitelik): Başlangıç değerleri
+                  // console.log(textbox.attr('placeholder')); // "Enter your name" -> HTML'deki placeholder
+                  // console.log(textbox.attr('value'));       // "John" -> HTML başlangıç değeri
+                  //
+                  // 2. Property (Özellik): Çalışma anındaki durum
+                  // console.log(textbox.prop('value'));       // "John" -> O anki değeri (başlangıçta John)
+                  //
+                  // Kullanıcı değerini değiştirdiğinde:
+                  // textbox.val('Doe'); // Kullanıcı metin kutusuna 'Doe' yazdı
+                  //
+                  // Yeni durumları kontrol edelim
+                  // console.log(textbox.attr('value'));       // "John" -> Başlangıç değeri (HTML'den gelir)
+                  // console.log(textbox.prop('value'));       // "Doe" -> Kullanıcının yazdığı yeni değer
+                  inp_iscorporate.prop('checked',result.data.isCorporate);
+                  inp_islocked.prop('checked',result.data.locked);
+
+                  // each, jQuery kütüphanesine özel bir metottur. Sadece jQuery nesneleri üzerinde çalışır.
+                  modalBody.find(".form-control").each(function () {
+                  // this her iterasyonda bir .form-control elemanını temsil eder.
+                  // $(this) ile jQuery objesi olarak işlem yapılabilir.
+                     if ($(this).val().trim() !== "")
+                         $(this).parent().addClass("is-filled");
+                  });
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function searchClients(search)
+        {
+        // encodeURIComponent JavaScript'te bir fonksiyondur ve URL içinde geçerli olmayan karakterleri URL güvenli bir formatta kodlamaya yarar. URL'de geçerli olmayan karakterler şunlardır:
+
+        // Boşluklar
+        // Özel karakterler (&, ?, =, /, #, % gibi)
+        // Unicode karakterleri (örneğin, ç, ğ, ü gibi Türkçe harfler)
+
+        // Neden Kullanılır?
+        // Eğer özel karakterler bir URL içinde kullanılırsa, URL'nin bozulmasına veya hatalara yol açabilir.
+
+        // Örneğin:
+        // const search = "john doe";
+        // const url = "/Clients/Search?search=" + search;
+
+        // Bu durumda URL şu şekilde oluşur:
+        // /Clients/Search?search=john doe
+
+        // Boşluk bir geçerli karakter değildir, bu yüzden URL çalışmaz.
+        // Bunun yerine:
+        // const search = "john doe";
+        // const url = "/Clients/Search?search=" + encodeURIComponent(search);
+
+        // Bu durumda URL şu şekilde kodlanır:
+        // /Clients/Search?search=john%20doe
+        // Bu artık geçerli bir URL'dir.
+
+            const url = '/Client/Search?search=' + encodeURIComponent(search);
+
+            $.ajax({
+                method: "get",
+                url: url,
+                beforeSend: function () {
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function (result){
+                if (result.isSuccess)
+                    updateTable(result.data);
+                else
+                    toastr.error(result.message);
+            }).fail(function (){
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function updateTable(clients)
+        {
+            const tbody = $("table tbody");
+
+            tbody.empty();
+
+            if (clients && clients.length > 0)
+            {
+                clients.forEach((client) => {
+                    const createdAt = client.createdAt ? new Date(client.createdAt).toLocaleString('tr-TR') : "Bilinmiyor";
+
+                    const row = `
+                        <tr>
+                            <td class="text-center">
+                                <span class="text-sm font-weight-bold mb-0">${client.name}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="text-sm font-weight-bold mb-0"><a href="mailto:${client.email}" target="_blank">${client.email}</a></span>
+                            </td>
+                            <td class="text-center">
+                                <span class="text-xs font-weight-bold mb-0">${client.isCorporate ? "Kurumsal" : "Bireysel"}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-sm ${client.locked ? "bg-gradient-secondary" : "bg-gradient-success"}">${client.locked ? "Pasif" : "Aktif"}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="text-sm font-weight-bold mb-0">${createdAt}</span>
+                            </td>
+                            <td class="text-center">
+                                <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-edit-client"
+                                   onclick="setClientModal(${client.id}, 'edit')">
+                                    Düzenle
+                                </a>
+
+                                <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-details-client"
+                                   onclick="setClientModal(${client.id}, 'details')">
+                                    Detay
+                                </a>
+
+                                <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-xs me-2"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal-delete-client"
+                                   onclick="setClientModal(${client.id}, 'delete')">
+                                    Sil
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+
+                    tbody.append(row);
+                });
+            }
+            else
+            {
+                tbody.append(`
+                    <tr>
+                        <td class="text-center" colspan="6">
+                            <span class="text-sm font-weight-bold mb-0">Arama kriterlerine uygun müşteri bulunamadı.</span>
+                        </td>
+                    </tr>
+                `);
+            }
+        }
+
+        // Debouncing, bir olayın (örneğin bir giriş alanına yazma gibi) sürekli tetiklenmesi yerine belirli bir süre bekleyerek tek bir işlem yapılmasını sağlar.
+
+        // searchTimeout: Kullanıcı sürekli bir şeyler yazarken önceki işlemleri iptal etmek için kullanılan bir zamanlayıcı değişkeni.
+
+        let searchTimeout;
+       
+        // jQuery'nin $() metodu DOM tamamen yüklendiğinde çalışacak işlemleri tanımlar.
+        $(function ()
+        {
+             var errorMessage = "@TempData["ErrorMessage"]";
+
+             if (errorMessage)
+                toastr.error(errorMessage);
+
+            // $("#search").on("input", ...): Kullanıcı arama kutusuna bir şey yazdığında çalışır.
+            $("#search").on("input", function () {
+                const search = $(this).val();
+
+                clearTimeout(searchTimeout);
+
+                // setTimeout asenkron olarak çalışıyor. Arka planda 1000 milisaniye bekledikten  sonraçalışır. Onun için kilitlenme olmaz ve JavaScript motorunu bloke olmaz.
+                // 1000 milisaniye, 1 saniyedir.
+                searchTimeout = setTimeout(function () {
+                    searchClients(search);
+                }, 1000);
+            });
+        });
+    </script>
+}

@@ -1,0 +1,109 @@
+﻿@* 
+ASP.NET Core, ViewComponent View'larını belirli bir dizinde arar.
+Views/Shared/Components/ComponentName/Default.cshtml olması gerekir.
+Eğer bu dizin dışında bir yere koyarsan, View("DosyaAdi") şeklinde belirtmen gerekir.
+ *@
+
+@model NavbarViewModel
+
+@{
+    bool hasNotifications = Model.Notifications.Any();
+}
+
+<a href="javascript:;" class="nav-link text-body p-0 font-weight-bold @(hasNotifications ? "" : "disabled")"
+   id="dropdownMenuButton"
+   data-bs-toggle="dropdown"
+   aria-expanded="false"
+   style="@(hasNotifications ? "" : "pointer-events: none; opacity: 0.5;")">
+    <i class="material-symbols-rounded">notifications</i>
+    <span class="d-sm-inline d-none">Bildirimler</span>
+</a>
+
+<ul class="dropdown-menu  dropdown-menu-end  px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+
+    @foreach (var item in Model.Notifications)
+    {
+        var url = "/";
+
+        switch (item.NotificationType)
+        {
+            case (int)NotificationType.IssueAdded:
+            case (int)NotificationType.IssueChanged:
+            case (int)NotificationType.IssueCompleted:
+                url = Url.Action("Index", "Issue");
+                break;
+
+            case (int)NotificationType.LeadAdded:
+            case (int)NotificationType.LeadChanged:
+            case (int)NotificationType.LeadCompleted:
+                url = Url.Action("Index", "Lead");
+                break;
+
+            default:
+                break;
+        }
+
+        <li class="mb-2">
+            <a class="dropdown-item border-radius-md" href="@url">
+                <div class="d-flex py-1">
+                    @switch ((int)item.NotificationType)
+                    {
+                        case (int)NotificationType.IssueAdded:
+                        case (int)NotificationType.IssueChanged:
+                            <div class="avatar avatar-sm bg-secondary me-3 my-auto">
+                                <i class="material-symbols-rounded">edit_note</i>
+                            </div>
+                            break;
+
+                        case (int)NotificationType.IssueCompleted:
+                            <div class="avatar avatar-sm bg-primary me-3 my-auto">
+                                <i class="material-symbols-rounded">task_alt</i>
+                            </div>
+                            break;
+
+                        case (int)NotificationType.LeadAdded:
+                        case (int)NotificationType.LeadChanged:
+                            <div class="avatar avatar-sm bg-warning me-3 my-auto">
+                                <i class="material-symbols-rounded">group_add</i>
+                            </div>
+                            break;
+
+                        case (int)NotificationType.LeadCompleted:
+                            <div class="avatar avatar-sm bg-info me-3 my-auto">
+                                <i class="material-symbols-rounded">check_circle</i>
+                            </div>
+                            break;
+
+                        default:
+                            <div class="avatar avatar-sm bg-dark me-3 my-auto">
+                                <i class="material-symbols-rounded">notifications</i>
+                            </div>
+                            break;
+                    }
+                    <div class="d-flex flex-column justify-content-center">
+                        <h6 class="text-sm font-weight-normal mb-1">
+                            @item.Text
+                        </h6>
+                        <p class="text-xs text-secondary mb-0">
+                            <i class="material-symbols-rounded">schedule</i>
+                            @item.CreatedAt
+                        </p>
+                    </div>
+
+                    @if (!item.IsRead)
+                    {
+                        <div class="ms-auto">
+                            <i class="material-symbols-rounded text-danger" title="Okunmadı">mark_email_unread</i>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ms-auto">
+                            <i class="material-symbols-rounded text-success" title="Okundu">done</i>
+                        </div>
+                    }
+                </div>
+            </a>
+        </li>
+    }
+</ul>

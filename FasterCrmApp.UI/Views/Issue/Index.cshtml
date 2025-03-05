@@ -1,0 +1,503 @@
+﻿@model Result<List<IssueModel>>;
+
+@{
+    ViewData["Title"] = "Görevler";
+    ViewData["PageName"] = "issue-index";
+    Layout = "_Layout";
+
+    var modals = new List<IssueModalViewModel>
+    {
+        new IssueModalViewModel
+        {
+            ID = "modal-create-issue",
+            Title = "Yeni Görev Oluştur",
+            TitleID = "modal-title-create",
+            ActionButtonText = "Kaydet",
+            ActionButtonClass = "bg-gradient-primary",
+            OnActionClick = "createIssue()",
+            ModelInputViewModel = new IssueModalInputViewModel { HasCompletedField = false }
+        },
+        new IssueModalViewModel
+        {
+            ID = "modal-edit-issue",
+            Title = "Görev Güncelleme",
+            TitleID = "modal-title-edit",
+            ActionButtonText = "Güncelle",
+            ActionButtonClass = "bg-gradient-warning",
+            OnActionClick = "updateIssue()",
+            ModelInputViewModel = new IssueModalInputViewModel { HasID = true }
+        },
+        new IssueModalViewModel
+        {
+            ID = "modal-details-issue",
+            Title = "Görev Detayları",
+            TitleID = "modal-title-details",
+            ModelInputViewModel = new IssueModalInputViewModel { IsReadonly = true, IsDisabled = true }
+        },
+        new IssueModalViewModel
+        {
+            ID = "modal-delete-issue",
+            Title = "Görev Sil (Bazı hataların geri dönüşü olmaz !)",
+            TitleID = "modal-title-delete",
+            ActionButtonText = "Sil",
+            ActionButtonClass = "bg-gradient-danger",
+            OnActionClick = "deleteIssue()",
+            ModelInputViewModel = new IssueModalInputViewModel { IsReadonly = true, IsDisabled = true,HasID = true  }
+        }
+    };
+}
+
+@section Styles {
+    <style>
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+                    <h6 class="text-white text-capitalize ps-3">Görevler</h6>
+                </div>
+            </div>
+            <div class="card-body px-0 pb-2">
+                <div class="px-4 d-flex justify-content-between">
+                    <div>
+                        <button class="btn btn-icon btn-3 btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modal-create-issue">
+                            <i class="material-symbols-rounded">add</i>
+                            <span>Yeni Görev</span>
+                        </button>
+                    </div>
+                    <div>
+                        <div class="input-group input-group-sm input-group-outline">
+                            <label class="form-label">Arama</label>
+                            <input id="search" name="search" type="text" class="form-control from-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center justify-content-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Özet</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Tamamlandı</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Son Tarih</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Atanan</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Kayıt Tarihi</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Data == null || Model.Data.Count == 0)
+                            {
+                                <tr>
+                                    <td class="text-center" colspan="6">
+                                        <span class="mb-0 ps-2 text-sm">Herhangi bir görev bulunamadı.</span>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var issue in Model.Data)
+                                {
+                                    <tr>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@issue.Summary</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-sm @(issue.IsCompleted ? " bg-gradient-success" : "bg-gradient-secondary")">@(issue.IsCompleted ? "Tamamlandı" : "Tamamlanmadı")</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@issue.DueDate</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@issue.UserName</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-sm font-weight-bold mb-0">@issue.CreatedAt</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-sm me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-edit-issue"
+                                               onclick="setIssueModal(@issue.ID, 'edit')">
+                                                Düzenle
+                                            </a>
+
+                                            <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-sm me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-details-issue"
+                                               onclick="setIssueModal(@issue.ID, 'details')">
+                                                Detay
+                                            </a>
+
+                                            <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-sm me-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#modal-delete-issue"
+                                               onclick="setIssueModal(@issue.ID, 'delete')">
+                                                Sil
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@foreach (var modal in modals)
+{
+    <partial name="_DynamicModal" model=modal></partial>
+}
+
+<div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Yükleniyor...</span>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const modalElements =
+        {
+            create: "#modal-create-issue .modal-body",
+            edit: "#modal-edit-issue .modal-body",
+            delete: "#modal-delete-issue .modal-body",
+            details: "#modal-details-issue .modal-body"
+        };
+
+        function getIssueData(modalType)
+        {
+            const modalBody = $(modalElements[modalType]);
+
+            const data = {
+                summary: modalBody.find("#summary").val(),
+                duedate: modalBody.find("#duedate").val(),
+                userid: modalBody.find("#userid").val(),
+                isCompleted: modalBody.find("#iscompleted").is(":checked"),
+            };
+
+            if (modalType !== "create" || modalType !== "details")
+                data.id = modalBody.find("#issueid").val();
+
+            return data;
+        }
+
+        function createIssue()
+        {
+            const modalBody = $(modalElements.create);
+            const data = getIssueData("create");
+            $.ajax({
+                method: "post",
+                url: "/Issue/Create",
+                data,
+                beforeSend: function (){
+                    modalBody.find(".is-invalid").removeClass("is-invalid");
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function (result) {
+                if (!result.isSuccess)
+                {
+                   for (var key in result.errors)
+                   {
+                    const field = modalBody.find('#' + key.toLowerCase());
+                    field.parent().addClass("is-invalid");
+
+                    result.errors[key].forEach(function (errorMessage)
+                    {
+                        toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                   toastr.success(result.message);
+
+                   setTimeout(function () {
+                       window.location.reload();
+                   }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function updateIssue()
+        {
+            const modalBody = $(modalElements.edit);
+            const data = getIssueData("edit");
+
+            $.ajax({
+                method: "post",
+                url: "/Issue/Update",
+                data,
+                beforeSend: function (){
+                    modalBody.find(".is-invalid").removeClass("is-invalid");
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function(result){
+                if (!result.isSuccess)
+                {
+                   for (var key in result.errors)
+                   {
+                    const field = modalBody.find('#' + key.toLowerCase());
+                    field.parent().addClass("is-invalid");
+
+                    result.errors[key].forEach(function (errorMessage) {
+                        toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                   toastr.success(result.message);
+
+                   setTimeout(function () {
+                       window.location.reload();
+                   }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function deleteIssue()
+        {
+            const data = getIssueData("delete");
+
+            $.ajax({
+                method: "post",
+                url : `/Issue/Delete/${data.id}`,
+                beforeSend: function (){
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function(result){
+                if (!result.isSuccess)
+                {
+                   for(var key in result.errors)
+                   {
+                    result.errors[key].forEach(function (errorMessage) {
+                        toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                   toastr.success(result.message);
+
+                   setTimeout(function () {
+                       window.location.reload();
+                   }, 1000);
+                }
+            }).fail(function () {
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function loadUserListSelect(modalType, callback) {
+            $.ajax({
+                method: "get",
+                url: "/Issue/GetUserList"
+            }).done(function (result) {
+                if (result.isSuccess)
+                {
+                    modalBody = $(modalElements[modalType]);
+
+                    const inp_userid = modalBody.find("#userid");
+                    inp_userid.empty();
+
+                    if (Array.isArray(result.data))
+                    {
+                        for (var i = 0; i < result.data.length; i++)
+                        {
+                         const user = result.data[i];
+                         inp_userid.append(`<option value="${user.id}">${user.name}</option>`);
+                        }
+                    }
+                    else
+                    {
+                         const user = result.data;
+                         inp_userid.append(`<option value="${user.id}">${user.name}</option>`);
+                    }
+                }
+            }).always(function () {
+                if (typeof callback === "function" && callback !== null)
+                    callback();
+            });
+        }
+
+        function setIssueModal(id, modalType)
+        {
+             loadUserListSelect(modalType, function () {
+               $.ajax({
+                method: "get",
+                url: `/Issue/Details/${id}`
+               }).done(function (result) {
+                   if (result.isSuccess)
+                   {
+                       modalBody = $(modalElements[modalType]);
+
+                       const inp_summary = modalBody.find("#summary");
+                       const inp_duedate = modalBody.find("#duedate");
+                       const inp_completed = modalBody.find("#completed");
+                       const inp_userid = modalBody.find("#userid");
+
+                       if (modalType !== "create" && modalType !== "details")
+                       {
+                         const inp_issueId = modalBody.find("#issueid");
+                         inp_issueId.val(result.data.id);
+                       }
+
+                       inp_summary.val(result.data.summary);
+                       inp_duedate.val(result.data.dueDate);
+                       inp_completed.prop("checked", result.data.completed);
+                       inp_userid.val(result.data.userID);
+
+                       modalBody.find(".form-control").each(function () {
+                           if ($(this).val().trim() !== "")
+                               $(this).parent().addClass("is-filled");
+                       });
+                   }
+                }).fail(function () {
+                    toastr.error("A connection to the server could not be established.");
+                });
+             })
+        }
+
+        function searchIssues(search)
+        {
+            const url = '/Issue/Search?search=' + encodeURIComponent(search);
+
+            $.ajax({
+                method: "get",
+                url: url,
+                beforeSend: function () {
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function (result){
+                if (result.isSuccess)
+                    updateTable(result.data);
+                else
+                    toastr.error(result.message);
+            }).fail(function (){
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function updateTable(issues)
+        {
+            const tbody = $("table tbody");
+
+            tbody.empty();
+
+            if (issues && issues.length > 0)
+            {
+                issues.forEach((issue) => {
+                    const createdAt = issue.createdAt ? new Date(issue.createdAt).toLocaleString('tr-TR') : "";
+                    const dueDate = issue.dueDate ? new Date(issue.dueDate).toLocaleDateString('tr-TR') : "";
+
+                    const row = `
+                        <tr>
+                            <td class="text-center">
+                                <span class="text-sm font-weight-bold mb-0">${issue.summary}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-sm ${issue.completed ? "bg-gradient-success" : "bg-gradient-secondary"}">
+                                    ${issue.completed ? "Tamamlandı" : "Tamamlanmadı"}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="text-sm font-weight-bold mb-0">${dueDate}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="text-sm font-weight-bold mb-0">${issue.userName}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="text-sm font-weight-bold mb-0">${createdAt}</span>
+                            </td>
+                            <td class="text-center">
+                                 <a href="javascript:;" class="btn btn-info btn-sm fw-bold text-sm me-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modal-edit-issue"
+                                    onclick="setIssueModal(${issue.id}, 'edit')">
+                                     Düzenle
+                                 </a>
+
+                                 <a href="javascript:;" class="btn btn-secondary btn-sm fw-bold text-sm me-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modal-details-issue"
+                                    onclick="setIssueModal(${issue.id}, 'details')">
+                                     Detay
+                                 </a>
+
+                                 <a href="javascript:;" class="btn btn-danger btn-sm fw-bold text-sm me-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modal-delete-issue"
+                                    onclick="setIssueModal(${issue.id}, 'delete')">
+                                     Sil
+                                 </a>
+                            </td>
+                        </tr>
+                    `;
+
+                    tbody.append(row);
+                });
+            }
+            else
+            {
+                tbody.append(`
+                    <tr>
+                        <td class="text-center" colspan="6">
+                            <span class="mb-0 ps-2 text-sm">Arama kriterlerine uygun görev bulunamadı.</span>
+                        </td>
+                    </tr>
+                `);
+            }
+        }
+
+        let searchTimeout;
+
+        $(function ()
+        {
+            $("#search").on("input", function () {
+                const search = $(this).val();
+
+                clearTimeout(searchTimeout);
+
+                searchTimeout = setTimeout(function () {
+                    searchIssues(search);
+                }, 1000);
+            });
+
+            loadUserListSelect("create");
+        });
+    </script>
+}

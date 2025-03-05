@@ -1,0 +1,26 @@
+﻿@model LeadModalViewModel
+
+<div class="modal fade" id="@Model.ID" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title font-weight-normal" id="@Model.TitleID">@Model.Title</h6>
+                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <partial name="_ModalInputs" model=Model.ModelInputViewModel></partial>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @if (!string.IsNullOrWhiteSpace(Model.ActionButtonText))
+                {
+                    <button type="button" class="btn @Model.ActionButtonClass" onclick="@Model.OnActionClick">@Model.ActionButtonText</button>
+                }
+                <button type="button" class="btn btn-link ml-auto" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,14 @@
+{
+  "version": "3.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "jquery@3.7.1",
+      "destination": "wwwroot/assets/js/plugins/jquery"
+    },
+    {
+      "library": "toastr.js@2.1.4",
+      "destination": "wwwroot/assets/js/plugins/toastr.js/"
+    }
+  ]
+}

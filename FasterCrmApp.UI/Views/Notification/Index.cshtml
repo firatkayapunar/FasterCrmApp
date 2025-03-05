@@ -1,0 +1,257 @@
+﻿@model Result<List<NotificationModel>>;
+
+@{
+    ViewData["Title"] = "Bildirimler";
+    ViewData["PageName"] = "notification-index";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <style>
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card my-4">
+            <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+                    <h6 class="text-white text-capitalize ps-3">Bildirimlerim</h6>
+                </div>
+            </div>
+            <div class="card-body px-0 pb-2">
+                <div class="px-4 d-flex justify-content-between">
+                    <div>
+                        <div class="input-group input-group-sm input-group-outline">
+                            <label class="form-label">Arama</label>
+                            <input id="search" name="search" type="text" class="form-control from-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center justify-content-center mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Bildirim</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Durum</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Kayıt Tarihi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Data == null || Model.Data.Count == 0)
+                            {
+                                <tr>
+                                    <td class="text-center" colspan="6">
+                                        <span class="mb-0 ps-2 text-sm">Herhangi bir bildirim verisi bulunamadı.</span>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var item in Model.Data)
+                                {
+                                    <tr>
+                                        <td class="text-center">
+                                            <span class="text-xs font-weight-bold mb-0">@item.Text</span>
+                                        </td>
+                                        <td class="align-middle text-center"
+                                            data-id="@item.ID"
+                                            data-isread="@item.IsRead.ToString().ToLower()">
+                                            <span class="badge cursor-pointer badge-sm bg-gradient-@(item.IsRead ? "success" : "secondary")"
+                                                  onclick="updateNotification(this)">
+                                                @(item.IsRead ? "Okundu" : "Okunmadı")
+                                            </span>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <span class="text-secondary text-xs font-weight-bold">@item.CreatedAt</span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Yükleniyor...</span>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        // 🔹 ViewComponent'ler doğrudan bir URL ile çağrılamaz.
+        // 🔹 Bir HTTP isteği ancak bir Controller'a gönderilebilir.
+        // 🔹 Bu yüzden "ComponentController" isminde bir Controller oluşturduk.
+        // 🔹 Bu Controller içinde, ilgili ViewComponent’i çağıran bir Action tanımladık.
+        // 🔹 Bu Action çalıştırıldığında, sistem otomatik olarak ViewComponent’i bulur, Invoke eder ve dönen HTML çıktısını istemciye gönderir.
+        // 🔹 Böylece her güncelleme işlemi sonrası (Okundu/Okunmadı) burası da güncellenecek.
+        function refreshNavbar() {
+            $.ajax({
+                url: "/Component/Navbar",
+                type: "GET",
+                success: function (data) {
+                    $("#navbar-container").html(data);
+                },
+                error: function () {
+                    toastr.error(errorMessage);
+                    console.error("Navbar güncellenirken hata oluştu.");
+                }
+            });
+        }
+
+        function updateNotification(el)
+        {
+            var span = $(el);
+            var td = span.parent();
+            var id = td.data("id");
+
+            // "true" veya "false" olan stringi, gerçek boolean değere çeviriyoruz.
+            var isread = td.data("isread") === "true";
+
+            // Değeri tersine çeviriyoruz.
+            isread = !isread;
+
+            $.ajax({
+                method: "post",
+                url: `/Notification/Update/${id}?isRead=${isread}`
+            }).done(function (result) {
+                if (!result.isSuccess)
+                {
+                   for (var key in result.errors)
+                   {
+                    const field = modalBody.find('#' + key.toLowerCase());
+                    field.parent().addClass("is-invalid");
+
+                    result.errors[key].forEach(function (errorMessage) {
+                         toastr.error(errorMessage);
+                    });
+                   }
+                }
+                else
+                {
+                    toastr.success(result.message);
+
+                    td.data("isread", isread.toString());
+
+                    if (isread) {
+                         // Eğer bildirim okunmuşsa:
+                         span.removeClass("bg-gradient-secondary").addClass("bg-gradient-success");
+                         span.text("Okundu");
+                    }
+                    else
+                    {
+                        // Eğer bildirim okunmamışsa:
+                        span.removeClass("bg-gradient-success").addClass("bg-gradient-secondary");
+                        span.text("Okunmadı");
+                    }
+
+                    // View Component'i tekrar yükleyeceğiz.
+                    refreshNavbar();
+                }
+            });
+        }
+
+        function searchNotifications(search)
+        {
+            const url = '/Notification/Search?search=' + encodeURIComponent(search);
+
+            $.ajax({
+                method: "get",
+                url: url,
+                beforeSend: function () {
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            }).done(function (result){
+                if (result.isSuccess)
+                    updateTable(result.data);
+                else
+                    toastr.error(result.message);
+            }).fail(function (){
+                toastr.error("A connection to the server could not be established.");
+            });
+        }
+
+        function updateTable(notifications)
+        {
+            const tbody = $("table tbody");
+
+            tbody.empty();
+
+            if (notifications && notifications.length > 0)
+            {
+                notifications.forEach((notification) => {
+                    const createdAt = notification.createdAt ? new Date(notification.createdAt).toLocaleString('tr-TR') : "Bilinmiyor";
+                    const isRead = notification.isRead ? "Okundu" : "Okunmadı";
+                    const badgeClass = notification.isRead ? "bg-gradient-success" : "bg-gradient-secondary";
+
+                    const row = `
+                        <tr>
+                            <td class="text-center">
+                                <span class="text-xs font-weight-bold mb-0">${notification.text}</span>
+                            </td>
+                            <td class="align-middle text-center"
+                                data-id="${notification.id}"
+                                data-isread="${notification.isRead.toString().toLowerCase()}">
+                                <span class="badge cursor-pointer badge-sm ${badgeClass}"
+                                onclick="update(this)">
+                                ${isRead}
+                                </span>
+                            </td>
+                            <td class="align-middle text-center">
+                                <span class="text-secondary text-xs font-weight-bold">${createdAt}</span>
+                            </td>
+                        </tr>
+                    `;
+
+                    tbody.append(row);
+                });
+            }
+            else
+            {
+                tbody.append(`
+                    <tr>
+                        <td class="text-center" colspan="3">
+                            <span class="text-sm font-weight-bold mb-0">Arama kriterlerine uygun bildirim bulunamadı.</span>
+                        </td>
+                    </tr>
+                `);
+            }
+        }
+
+        let searchTimeout;
+
+        $(function ()
+        {
+            $("#search").on("input", function () {
+                const search = $(this).val();
+
+                clearTimeout(searchTimeout);
+
+                searchTimeout = setTimeout(function () {
+                    searchNotifications(search);
+                }, 1000);
+            });
+        });
+    </script>
+}
