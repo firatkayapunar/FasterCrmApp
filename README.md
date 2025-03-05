@@ -51,7 +51,7 @@ Bu proje, **müşteri, kullanıcı, talep ve görev yönetimini** merkezi bir si
 
 ### Talepler
 ![416892190-dfd29909-ed99-4216-a010-6e695ee36424](https://github.com/user-attachments/assets/647d467a-8347-44c2-9661-ada6fd61808c)
-![416893165-a7211bf7-928c-401f-96b8-e8f30d6373a5](https://github.com/user-attachments/assets/7f3908b6-2afd-4901-943b-c40da2208faa)
+![416893165-a7211bf7-928c-401f-96b8-e8f30d6373a5](https://github.com/user-attachments/assets/2984a7df-5f49-4c43-80c1-efbe70abb11e)
 
 ### Görev Yönetimi
 ![416892275-50457275-8f7a-4e5d-829d-2ff798f58e81](https://github.com/user-attachments/assets/a896f323-3fe4-4e45-933d-25f24763b0d8)
@@ -60,7 +60,7 @@ Bu proje, **müşteri, kullanıcı, talep ve görev yönetimini** merkezi bir si
 ![416892314-d4508bee-6d45-4f97-8900-fdc93c52b70f](https://github.com/user-attachments/assets/55c3240c-13d1-47ff-87c8-7f66e77d3b78)
 
 ### Müşteri Yönetimi
-![416890840-27c390b9-055c-43b5-b4d6-6535bd6b1962](https://github.com/user-attachments/assets/8f556376-cdb0-46c6-acf4-092ab76a0fd8)
+![2](https://github.com/user-attachments/assets/747238f8-f96c-41db-8f0a-62d2f893eb32)
 
 ---
 
